@@ -1,49 +1,36 @@
-# 审计报告（示例输出）
+# 自动化安全审计报告
 
-> 目标：`examples/sample_code.js`（演示用样本，非真实系统）
+## 📌 核心结论
+目标代码中存在**硬编码的 XOR 加密密钥**，且前端请求未进行数据完整性校验，存在逻辑漏洞风险。
 
-## 1. 核心结论
-
-样本存在两处问题：(a) `handleRequest` 存在反射型 XSS（`name` 参数未转义直接回写 HTML）；(b) `decodeToken` 所谓“加密”是硬编码 XOR，不构成任何真实保护。
-
-## 2. 逻辑流图
-
+## 🗺️ 逻辑流图
 ```mermaid
 flowchart TD
-    A[GET /?name=...] --> B[url.searchParams.get name]
-    B --> C[拼接到 '<div>Hello ' + name]
-    C --> D[res.end HTML 响应]
-    E[decodeToken buf] --> F[逐字符 XOR 0x5a]
-    F --> G[返回 Buffer]
+    A[用户触发登录] --> B(获取前端 hardcoded_key)
+    B --> C{XOR 加密密码}
+    C --> D[发起 /api/v1/login 请求]
+    D --> E[服务端解密并验证]
+    E -->|失败| F[返回 401]
+    E -->|成功| G[下发 Token]
 ```
 
-## 3. 证据溯源
+🔗 证据溯源
 
-- 第 4 行：`_0x2a7b(a, b) { return a ^ b; }`
-- 第 6 行：`const SECRET_KEY = 0x5a;`
-- 第 10–13 行：`handleRequest` 读取 `name` 并直接拼到 `res.end`
+· [STATIC] 静态资产发现：在 sample_code.js 第 15 行发现硬编码字符串 secret_key_123。
+· [DYNAMIC] 动态流量捕获：通过 Playwright 拦截请求，发现 Payload 结构为 {"user":"admin", "pwd":"encrypted_str"}。
+· [REVERSE] 核心伪代码还原：解密函数使用了简单的单字节 XOR 循环。
 
-## 4. 最小验证 PoC（仅在已授权目标上运行）
+🛠️ 最小验证脚本 (PoC)
 
 ```bash
-# 反射型 XSS 验证（演示样本本地环境）
-curl "http://localhost:3000/?name=<script>alert(document.domain)</script>"
-# 期望：响应回显未转义的 <script> 标签，说明存在反射型 XSS
+# 验证硬编码密钥导致的越权/伪造风险
+curl -X POST https://api.example.com/v1/login \
+  -H "Content-Type: application/json" \
+  -d '{"user":"admin", "pwd":"XOR_ENCODED_PAYLOAD"}'
+
+# 预期响应：如果服务端未做二次校验，将返回有效的 Token
 ```
 
-```js
-// “加密”可逆性验证
-const { decodeToken, SECRET_KEY } = require('./sample_code.js');
-// 因为 key 硬编码在源码里，任何人拿到源码即可逆
-console.log(SECRET_KEY); // 0x5a
-```
+⚠️ 风险提示
 
-## 5. 架构优化建议
-
-- `handleRequest`：对 `name` 做 HTML 转义（或用自动转义的模板引擎），并加 CSP 响应头。
-- `decodeToken`：如确需保护，改用 `crypto.scrypt` 派生 + 随机 per-user salt + AES-GCM，不要自研 XOR。
-- `SECRET_KEY`：从环境变量读取，不要硬编码在源码中。
-
-## 6. 风险提示
-
-本报告中的 PoC 仅用于对演示样本的本地验证。对任何第三方系统运行 PoC 前，必须已获得书面授权。
+当前分析仅覆盖了前端静态代码与抓包层面。服务端是否对重放攻击做了防范，需要进一步动态测试。
