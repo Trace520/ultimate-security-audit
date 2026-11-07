@@ -1,3 +1,12 @@
+"""OpenAI-compatible audit client.
+
+Reads the system prompt from ../prompt/system_prompt.txt and forwards
+stdin as the user message. API key is read from OPENAI_API_KEY env var.
+
+Usage:
+    set OPENAI_API_KEY=sk-xxxx
+    echo code | python openai_compatible.py
+"""
 import os
 import sys
 

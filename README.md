@@ -51,7 +51,7 @@ ultimate-security-audit/
 ├── docs/
 │   └── toolchain.md
 ├── examples/
-│   ├── sample_code.js        # 训练用样本（含模拟混淆与“假加密”）
+│   ├── sample_code.js        # 演示用样本（含模拟混淆与“假加密”）
 │   ├── reverse_notes.md      # 证据链笔记示例
 │   └── audit_report.md       # 标准审计报告示例
 └── .github/
@@ -66,4 +66,4 @@ ultimate-security-audit/
 ## 📚 扩展阅读
 
 - [底层工具链配置指南](docs/toolchain.md)
-- [示例：对训练样本的审计输出](examples/audit_report.md)
+- [示例：对演示样本的审计输出](examples/audit_report.md)

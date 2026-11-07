@@ -1,6 +1,6 @@
 # 审计报告（示例输出）
 
-> 目标：`examples/sample_code.js`（训练用样本，非真实系统）
+> 目标：`examples/sample_code.js`（演示用样本，非真实系统）
 
 ## 1. 核心结论
 
@@ -26,7 +26,7 @@ flowchart TD
 ## 4. 最小验证 PoC（仅在已授权目标上运行）
 
 ```bash
-# 反射型 XSS 验证（训练样本本地环境）
+# 反射型 XSS 验证（演示样本本地环境）
 curl "http://localhost:3000/?name=<script>alert(document.domain)</script>"
 # 期望：响应回显未转义的 <script> 标签，说明存在反射型 XSS
 ```
@@ -46,4 +46,4 @@ console.log(SECRET_KEY); // 0x5a
 
 ## 6. 风险提示
 
-本报告中的 PoC 仅用于对训练样本的本地验证。对任何第三方系统运行 PoC 前，必须已获得书面授权。
+本报告中的 PoC 仅用于对演示样本的本地验证。对任何第三方系统运行 PoC 前，必须已获得书面授权。

@@ -1,4 +1,4 @@
-// sample_code.js — training fixture for the audit skill. NOT real production code.
+// sample_code.js — demo fixture for the audit skill. NOT real production code.
 const http = require('http');
 
 function _0x2a7b(a, b) { return a ^ b; }            // "obfuscated" XOR helper
