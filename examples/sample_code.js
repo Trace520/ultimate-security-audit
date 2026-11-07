@@ -6,7 +6,8 @@
     function _0xe1b2(str) {
         var result = "";
         for (var i = 0; i < str.length; i++) {
-            result += String.fromCharCode(str.charCodeAt(i) ^ _0x4f2a.charCodeAt(0));
+            // 循环使用整个 key
+            result += String.fromCharCode(str.charCodeAt(i) ^ _0x4f2a.charCodeAt(i % _0x4f2a.length));
         }
         return btoa(result); // 简单的 Base64 包装
     }

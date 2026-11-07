@@ -7,8 +7,10 @@ if not api_key:
     raise ValueError("未检测到 OPENAI_API_KEY 环境变量，请先配置。")
 
 # 读取系统提示词
+current_dir = os.path.dirname(os.path.abspath(__file__))
+prompt_path = os.path.join(current_dir, "../prompt/system_prompt.txt")
 try:
-    with open("prompt/system_prompt.txt", "r", encoding="utf-8") as f:
+    with open(prompt_path, "r", encoding="utf-8") as f:
         system_prompt = f.read()
 except FileNotFoundError:
     raise FileNotFoundError("找不到 prompt/system_prompt.txt 文件，请确保路径正确。")
