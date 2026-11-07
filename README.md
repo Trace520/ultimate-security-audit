@@ -1,5 +1,7 @@
 # 🛡️ Ultimate Security Audit Agent Skill
 
+> A portable AI Agent skill that turns any LLM into a structured code & architecture reviewer. Three-stage funnel, evidence-first output, runs on Claude Code / Cursor / ChatGPT / Kimi / Doubao / any OpenAI-compatible API.
+
 > 让 AI Agent 协助进行结构化的代码与架构审查：内置三阶漏斗模型、强制工具链路由与证据溯源机制。**全平台兼容，开源免费。**
 
 ## 🌟 全平台支持矩阵
@@ -18,13 +20,21 @@
 
 ## 🚀 快速开始
 
-克隆本项目后，根据上方的平台矩阵选择对应文件。在审查自有代码、开源项目或已授权目标时，建议配合 `Playwright MCP`、`webcrack`、`Ghidra` 等底层工具使用。
+**方式 A：直接克隆到 Agent 的 skills 目录（以 Claude Code 为例）**
+
+```bash
+git clone https://github.com/Trace520/ultimate-security-audit.git ~/.claude/skills/ultimate-security-audit
+```
+
+**方式 B：克隆到任意位置，按平台挑选文件**
 
 ```bash
 git clone https://github.com/Trace520/ultimate-security-audit.git
 cd ultimate-security-audit
 # 按平台选择 skill/SKILL.md 或 prompt/system_prompt.txt
 ```
+
+在审查自有代码、开源项目或已授权目标时，建议配合 `Playwright MCP`、`webcrack`、`Ghidra` 等底层工具使用。
 
 ## 📂 仓库结构
 
@@ -38,8 +48,15 @@ ultimate-security-audit/
 │   └── system_prompt.txt
 ├── api/
 │   └── openai_compatible.py
-└── docs/
-    └── toolchain.md
+├── docs/
+│   └── toolchain.md
+├── examples/
+│   ├── sample_code.js        # 训练用样本（含模拟混淆与“假加密”）
+│   ├── reverse_notes.md      # 证据链笔记示例
+│   └── audit_report.md       # 标准审计报告示例
+└── .github/
+    └── ISSUE_TEMPLATE/
+        └── bug_report.md
 ```
 
 ## ⚠️ 免责声明
@@ -49,3 +66,4 @@ ultimate-security-audit/
 ## 📚 扩展阅读
 
 - [底层工具链配置指南](docs/toolchain.md)
+- [示例：对训练样本的审计输出](examples/audit_report.md)
