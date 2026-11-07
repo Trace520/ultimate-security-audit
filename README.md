@@ -1,112 +1,87 @@
+#🛡️ 安全审核代理技能
+
 [英语](现在我们要做些什么?) | [简体中文](#中文版)
-##🛡️ 安全审核代理技能
 
 ![美国](https://github.com/Trace520/ultimate-security-audit/actions/workflows/ci.yml/badge.svg)
+![许可证](https://img.shields.io/badge/license-MIT-blue.svg)
 
-> 让 AI Agent 协助进行结构化的代码与架构审查：内置三阶漏斗模型、强制工具链路由与证据溯源机制。**全平台兼容，开源免费。**
-
-<一个身份标识="中文版"></一个>
-
-## 🌟 全平台支持矩阵
-
-| 平台类型 | 使用方式 | 对应文件 |
-| :--- | :--- | :--- |
-| **Claude Code / Cursor / 其他 Agent 运行时** | 原生技能加载（放入 skills 目录） | `skill/SKILL.md` |
-| **ChatGPT / Kimi / 豆包 网页版** | 复制粘贴作为系统提示词 | `系统的提示` |
-| **Python / 自动化脚本** | 作为 System Message 注入 | `美国政府` |
-
-## 💡 解决的痛点
-
-- **结构化审查**：三阶漏斗（静态发现 → 中间层降维 → 深度推演），避免一上来就陷入细节。
-- **节省上下文**：分层处理，先抓核心模块再下钻，减少无效 Token 消耗。
-- **拒绝幻觉**：强制证据溯源，所有结论必须引用代码中的具体行/特征，信息不足时直接说明。
-
-## 🚀 快速开始
-
-**方式 A：直接克隆到 Agent 的 skills 目录（以 Claude Code 为例）**
-
-```bash
-git clone https://github.com/Trace520/ultimate-security-audit.git ~/.claude/skills/ultimate-security-audit
-```
-
-**方式 B：克隆到任意位置，按平台挑选文件**
-
-```bash
-git clone https://github.com/Trace520/ultimate-security-audit.git
-cd ultimate-security-audit
-# 按平台选择 skill/SKILL.md 或 prompt/system_prompt.txt
-```
-
-**方式 C：Docker（自带 Playwright 运行时）**
-
-```bash
-docker build -t ultimate-security-audit .
-```
-
-在审查自有代码、开源项目或已授权目标时，建议配合 `Playwright MCP`、`webcrack`、`Ghidra` 等底层工具使用。
-
-## 📂 仓库结构
-
-```text
-ultimate-security-audit/
-├── README.md
-├── LICENSE
-├── Dockerfile
-├── skill/
-│   └── SKILL.md
-├── prompt/
-│   └── system_prompt.txt
-├── api/
-│   └── openai_compatible.py
-├── docs/
-│   └── toolchain.md
-├── examples/
-│   ├── sample_code.js
-│   ├── reverse_notes.md
-│   └── audit_report.md
-└── .github/
-    ├── ISSUE_TEMPLATE/
-    │   ├── bug_report.md
-    │   └── feature_request.md
-    └── workflows/
-        └── ci.yml
-```
-
-## ⚠️ 免责声明
-
-本项目仅用于合法的企业级软件安全审计、自有资产测试、开源项目分析及已授权的安全研究。使用者需确保对审查目标拥有合法授权；严禁用于任何未授权的逆向、破解或攻击行为。详见 [DISCLAIMER.md](DISCLAIMER.md)。
-
-## 📚 扩展阅读
-
-- [底层工具链配置指南](docs/toolchain.md)
-- [示例：对演示样本的审计输出](examples/audit_report.md)
-- [安全策略（漏洞披露）](SECURITY.md)
-- [贡献指南](CONTRIBUTING.md)
+> 让 AI Agent 化身无情的白帽审计机器：内置三阶漏斗模型、强制工具链路由与防幻觉记忆机制。告别 AI 的废话与无脑拒答。
 
 ---
 
-<a id="english-version"></a>
+<一个标签:="中文版"></一个>
+## 🇨🇳 中文版
 
-## English Version
+### 💡 解决的痛点
 
-**Ultimate Security Audit** is a portable AI Agent skill that turns any LLM into a structured code & architecture reviewer. It uses a three-stage funnel (static discovery → intermediate deobfuscation → deep logic deduction) with evidence-first output (every claim must cite a file and line, no hallucination).
+- **拒绝死循环**：通过严谨的“红队靶场”上下文覆盖，消除 AI 无限索要授权的问题。
+- **拒绝上下文爆炸**：独创三阶漏斗（侦察 -> 中间件降维 -> 重型攻坚），极大节省 Token。
+- **拒绝幻觉**：强制将证据写入本地 `reverse_notes.md`，所有结论必须有源可溯。
 
-### Supported platforms
+### 🌟 全平台支持矩阵
 
-| Platform | How to use | File |
+| 平台类型 | 使用方式 | 对应文件 |
 | :--- | :--- | :--- |
-| Claude Code / Cursor / other agent runtimes | Load as a native skill | `skill/SKILL.md` |
-| ChatGPT / Kimi / Doubao web UIs | Paste as system prompt | `prompt/system_prompt.txt` |
-| Python / automation | Inject as a system message | `api/openai_compatible.py` |
+| **克劳德代码/光标/工作伙伴** | 原生技能加载（放入 skills 目录） | `skill/SKILL.md` |
+| **ChatGPT / Kimi / 豆包 网页版** | 复制粘贴作为系统提示词 | `系统的提示` |
+| **Python / 自动化脚本** | 作为 System Message 注入 API | `美国政府` |
 
-### Quick start
+### 🚀 快速开始
 
-```bash
-git clone https://github.com/Trace520/ultimate-security-audit.git ~/.claude/skills/ultimate-security-audit
-# or
-docker build -t ultimate-security-audit .
+**方式一：克隆至 Agent 技能目录（以 Claude Code 为例）**
+```猛击
+git克隆https://github.com/Trace520/ultimate-security-audit.git~/.claude/skillips/终极安全审核
 ```
 
-### Disclaimer
+方式二：Docker 快速体验
 
-This project is for legitimate security auditing of your own assets, open-source code analysis, and authorized red-team exercises only. You must have explicit written permission before testing any third-party system. See [DISCLAIMER.md](DISCLAIMER.md) and the additional terms in [LICENSE](LICENSE).
+```猛击
+# 构建镜像
+Docker构建-t最终-安全-审计。
+
+# 运行容器
+Docker run-rm-it最终-安全-审核
+```
+
+📂 仓库结构
+
+· skill/ - 原生 Agent 技能核心文件（SKILL.md）
+· prompt/ - 适用于网页版大模型的纯文本提示词
+· api/ - Python 自动化集成脚本
+· examples/ - 真实运行演示（包含代码样本、证据链笔记、Mermaid 审计报告）
+🛡️ 终极安全审核代理技能
+
+⚠️ 免责声明
+
+本项目仅用于合法的企业级软件安全审计、自有资产测试及已获授权的红队演练。严禁用于任何未授权的恶意攻击行为。 使用前请务必阅读 DISCLAIMER.md 及 SECURITY.md。
+
+---
+
+<一个标签:="英语版本"></一个>
+
+🇬🇧 英文版
+
+终极安全审核代理技能
+
+企业级代码审查和自动化逆向工程AI代理工作流技能。
+
+✨ 功能
+
+·三级漏斗：强制AI执行“静态侦察->中间件去模糊->深度分析”，保存令牌，防止幻觉。
+·上下文覆盖：内置红队演练上下文，绕过AI重复的授权提示。
+·抗幻觉存储器：在得出结论之前，强制AI将证据(API路径、伪代码)写入本地reverse_notes.md。
+·Toolchain路由：根据目标特性自动路由到Playwright MCP(流量捕获)、webcrack(去模糊处理)或jadx(反编译)。
+
+🚀 快速入门
+
+```猛击
+git克隆https://github.com/Trace520/ultimate-security-audit.git~/.claude/skillips/终极安全审核
+```
+
+⚠️ 免责声明
+
+此工具严格用于授权安全测试、资产审计和红色团队演练。有关详细信息，请参阅DISCLAIMER.MD。
+
+---
+
+如果这个项目对你有帮助，请考虑给它安0！
