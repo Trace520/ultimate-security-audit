@@ -19,3 +19,16 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+
+ADDITIONAL TERMS FOR SECURITY TOOLS
+
+This Software is a security audit and reverse-engineering skill. By using it, you agree to the following additional terms, which supplement (and do not replace) the MIT License above:
+
+1. Authorized use only. You may only use this Software on systems you own, or on systems for which you have explicit written permission from the owner/operator.
+2. No unlawful use. You must not use this Software for any purpose that violates applicable laws, including unauthorized access, computer fraud, or circumvention of access controls.
+3. User responsibility. You are solely responsible for any consequences arising from your use of this Software. The authors and contributors disclaim all liability for misuse, damages, or legal exposure.
+4. Education and research. This Software is provided for educational purposes, authorized security testing, and legitimate security research.
+
+If you cannot agree to these terms, do not use the Software.
