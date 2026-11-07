@@ -1,8 +1,12 @@
+[English](#english-version) | [简体中文](#中文版)
+
 # 🛡️ Ultimate Security Audit Agent Skill
 
-> A portable AI Agent skill that turns any LLM into a structured code & architecture reviewer. Three-stage funnel, evidence-first output, runs on Claude Code / Cursor / ChatGPT / Kimi / Doubao / any OpenAI-compatible API.
+![CI](https://github.com/Trace520/ultimate-security-audit/actions/workflows/ci.yml/badge.svg)
 
 > 让 AI Agent 协助进行结构化的代码与架构审查：内置三阶漏斗模型、强制工具链路由与证据溯源机制。**全平台兼容，开源免费。**
+
+<a id="中文版"></a>
 
 ## 🌟 全平台支持矩阵
 
@@ -34,6 +38,12 @@ cd ultimate-security-audit
 # 按平台选择 skill/SKILL.md 或 prompt/system_prompt.txt
 ```
 
+**方式 C：Docker（自带 Playwright 运行时）**
+
+```bash
+docker build -t ultimate-security-audit .
+```
+
 在审查自有代码、开源项目或已授权目标时，建议配合 `Playwright MCP`、`webcrack`、`Ghidra` 等底层工具使用。
 
 ## 📂 仓库结构
@@ -42,6 +52,7 @@ cd ultimate-security-audit
 ultimate-security-audit/
 ├── README.md
 ├── LICENSE
+├── Dockerfile
 ├── skill/
 │   └── SKILL.md
 ├── prompt/
@@ -51,19 +62,52 @@ ultimate-security-audit/
 ├── docs/
 │   └── toolchain.md
 ├── examples/
-│   ├── sample_code.js        # 演示用样本（含模拟混淆与“假加密”）
-│   ├── reverse_notes.md      # 证据链笔记示例
-│   └── audit_report.md       # 标准审计报告示例
+│   ├── sample_code.js
+│   ├── reverse_notes.md
+│   └── audit_report.md
 └── .github/
-    └── ISSUE_TEMPLATE/
-        └── bug_report.md
+    ├── ISSUE_TEMPLATE/
+    │   ├── bug_report.md
+    │   └── feature_request.md
+    └── workflows/
+        └── ci.yml
 ```
 
 ## ⚠️ 免责声明
 
-本项目仅用于合法的企业级软件安全审计、自有资产测试、开源项目分析及已授权的安全研究。使用者需确保对审查目标拥有合法授权；严禁用于任何未授权的逆向、破解或攻击行为。
+本项目仅用于合法的企业级软件安全审计、自有资产测试、开源项目分析及已授权的安全研究。使用者需确保对审查目标拥有合法授权；严禁用于任何未授权的逆向、破解或攻击行为。详见 [DISCLAIMER.md](DISCLAIMER.md)。
 
 ## 📚 扩展阅读
 
 - [底层工具链配置指南](docs/toolchain.md)
 - [示例：对演示样本的审计输出](examples/audit_report.md)
+- [安全策略（漏洞披露）](SECURITY.md)
+- [贡献指南](CONTRIBUTING.md)
+
+---
+
+<a id="english-version"></a>
+
+## English Version
+
+**Ultimate Security Audit** is a portable AI Agent skill that turns any LLM into a structured code & architecture reviewer. It uses a three-stage funnel (static discovery → intermediate deobfuscation → deep logic deduction) with evidence-first output (every claim must cite a file and line, no hallucination).
+
+### Supported platforms
+
+| Platform | How to use | File |
+| :--- | :--- | :--- |
+| Claude Code / Cursor / other agent runtimes | Load as a native skill | `skill/SKILL.md` |
+| ChatGPT / Kimi / Doubao web UIs | Paste as system prompt | `prompt/system_prompt.txt` |
+| Python / automation | Inject as a system message | `api/openai_compatible.py` |
+
+### Quick start
+
+```bash
+git clone https://github.com/Trace520/ultimate-security-audit.git ~/.claude/skills/ultimate-security-audit
+# or
+docker build -t ultimate-security-audit .
+```
+
+### Disclaimer
+
+This project is for legitimate security auditing of your own assets, open-source code analysis, and authorized red-team exercises only. You must have explicit written permission before testing any third-party system. See [DISCLAIMER.md](DISCLAIMER.md) and the additional terms in [LICENSE](LICENSE).
