@@ -1,20 +1,19 @@
-[English](#english-version) | [简体中文](#中文版)
+[英语](现在我们要做些什么?) | [简体中文](#中文版)
+#🛡️ 安全审核代理技能
 
-# 🛡️ Ultimate Security Audit Agent Skill
-
-![CI](https://github.com/Trace520/ultimate-security-audit/actions/workflows/ci.yml/badge.svg)
+![美国](https://github.com/Trace520/ultimate-security-audit/actions/workflows/ci.yml/badge.svg)
 
 > 让 AI Agent 协助进行结构化的代码与架构审查：内置三阶漏斗模型、强制工具链路由与证据溯源机制。**全平台兼容，开源免费。**
 
-<a id="中文版"></a>
+<一个身份标识="中文版"></一个>
 
 ## 🌟 全平台支持矩阵
 
 | 平台类型 | 使用方式 | 对应文件 |
 | :--- | :--- | :--- |
 | **Claude Code / Cursor / 其他 Agent 运行时** | 原生技能加载（放入 skills 目录） | `skill/SKILL.md` |
-| **ChatGPT / Kimi / 豆包 网页版** | 复制粘贴作为系统提示词 | `prompt/system_prompt.txt` |
-| **Python / 自动化脚本** | 作为 System Message 注入 | `api/openai_compatible.py` |
+| **ChatGPT / Kimi / 豆包 网页版** | 复制粘贴作为系统提示词 | `系统的提示` |
+| **Python / 自动化脚本** | 作为 System Message 注入 | `美国政府` |
 
 ## 💡 解决的痛点
 
