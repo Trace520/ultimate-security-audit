@@ -7,7 +7,7 @@
 **结构化代码 & 架构审查的 AI Agent 技能**
 
 [![CI](https://github.com/Trace520/ultimate-security-audit/actions/workflows/ci.yml/badge.svg)](https://github.com/Trace520/ultimate-security-audit/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/badge/release-v1.0.0-blue?logo=github&style=flat-square)](https://github.com/Trace520/ultimate-security-audit/releases/tag/v1.0.0)
+[![Release](https://img.shields.io/badge/release-v1.1-blue?logo=github&style=flat-square)](https://github.com/Trace520/ultimate-security-audit/releases/tag/v1.1)
 [![License](https://img.shields.io/badge/license-MIT%20%2B%20Security%20Terms-green?style=flat-square)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue?logo=python&style=flat-square)](api/openai_compatible.py)
 [![Docker](https://img.shields.io/badge/docker-ready-blue?logo=docker&style=flat-square)](Dockerfile)
@@ -49,7 +49,7 @@
 
 | 能力 | 说明 |
 | :--- | :--- |
-| 🪣 **三阶漏斗** | 静态 → 降维 → 推演，不跳步、不越级下结论 |
+| 🪣 **三阶漏斗模型** | 静态 → 降维 → 推演，不跳步、不越级下结论 |
 | 🔍 **证据溯源** | 所有结论必须绑定文件 + 行号；信息不足直接说"不确定" |
 | 🧠 **防幻觉记忆** | 笔记按时间倒序累积，多轮对话不丢上下文 |
 | 🛠 **工具链路由** | 根据目标自动引导 Playwright MCP / webcrack / Ghidra / jadx |
@@ -152,8 +152,9 @@ ultimate-security-audit/
 ## 🗺 路线图
 
 - [x] **v1.0.0** — 初始发布：三阶漏斗、全平台支持、CI、Docker、社区健康文件
-- [ ] **v1.1** — 新增对 iOS / Android 客户端样本的专项分析流程
-- [ ] **v1.2** — 支持导出 Markdown / HTML 双格式审计报告
+- [x] **v1.1** — README 全面升级（横幅 / 徽章 / FAQ / 双语对等）、CI 跨平台矩阵、pathlib 重构
+- [ ] **v1.2** — 新增对 iOS / Android 客户端样本的专项分析流程
+- [ ] **v1.3** — 支持导出 Markdown / HTML 双格式审计报告
 - [ ] **v2.0** — 多模型并行审查（GPT / Claude / DeepSeek 合并结论）
 
 ## ⚠️ 免责声明
@@ -250,8 +251,9 @@ Yes, but only with explicit written authorization. See [DISCLAIMER.md](DISCLAIME
 ## Roadmap
 
 - [x] **v1.0.0** — Initial release: three-stage funnel, multi-platform, CI, Docker, community health files
-- [ ] **v1.1** — Targeted flows for iOS / Android client samples
-- [ ] **v1.2** — Export reports in both Markdown and HTML
+- [x] **v1.1** — README overhaul (hero / badges / FAQ / bilingual parity), cross-platform CI matrix, pathlib refactor
+- [ ] **v1.2** — Targeted flows for iOS / Android client samples
+- [ ] **v1.3** — Export reports in both Markdown and HTML
 - [ ] **v2.0** — Multi-model parallel review (GPT / Claude / DeepSeek consensus)
 
 ## Disclaimer
@@ -263,7 +265,7 @@ Yes, but only with explicit written authorization. See [DISCLAIMER.md](DISCLAIME
 
 <div align="center">
 
-**[📢 Release v1.0.0](https://github.com/Trace520/ultimate-security-audit/releases/tag/v1.0.0)** ·
+**[📢 Release v1.1](https://github.com/Trace520/ultimate-security-audit/releases/tag/v1.1)** ·
 **[🐛 Report a bug](https://github.com/Trace520/ultimate-security-audit/issues/new?template=bug_report.md)** ·
 **[✨ Request a feature](https://github.com/Trace520/ultimate-security-audit/issues/new?template=feature_request.md)**
 
