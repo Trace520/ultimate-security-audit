@@ -7,7 +7,7 @@
 **结构化代码 & 架构审查的 AI Agent 技能**
 
 [![CI](https://github.com/Trace520/ultimate-security-audit/actions/workflows/ci.yml/badge.svg)](https://github.com/Trace520/ultimate-security-audit/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/badge/release-v1.02-blue?logo=github&style=flat-square)](https://github.com/Trace520/ultimate-security-audit/releases/tag/v1.02)
+[![Release](https://img.shields.io/badge/release-v1.0.0-blue?logo=github&style=flat-square)](https://github.com/Trace520/ultimate-security-audit/releases/tag/v1.0.0)
 [![License](https://img.shields.io/badge/license-MIT%20%2B%20Security%20Terms-green?style=flat-square)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue?logo=python&style=flat-square)](api/openai_compatible.py)
 [![Docker](https://img.shields.io/badge/docker-ready-blue?logo=docker&style=flat-square)](Dockerfile)
@@ -130,7 +130,7 @@ ultimate-security-audit/
 
 ## 🗺 路线图
 
-- [x] v1.02 — 初始发布：三阶漏斗、全平台支持、CI、Docker、社区健康文件
+- [x] v1.0.0 — 初始发布：三阶漏斗、全平台支持、CI、Docker、社区健康文件
 - [ ] v1.1 — 新增对 iOS / Android 客户端样本的专项分析流程
 - [ ] v1.2 — 支持导出 Markdown / HTML 双格式审计报告
 - [ ] v2.0 — 多模型并行审查（同时跑 GPT / Claude / DeepSeek 并合并结论）
@@ -197,7 +197,7 @@ docker run --rm -it ultimate-security-audit
 
 ### Roadmap
 
-- [x] v1.02 — Initial release: three-stage funnel, multi-platform, CI, Docker, community health files
+- [x] v1.0.0 — Initial release: three-stage funnel, multi-platform, CI, Docker, community health files
 - [ ] v1.1 — Targeted flows for iOS / Android client samples
 - [ ] v1.2 — Export reports in both Markdown and HTML
 - [ ] v2.0 — Multi-model parallel review (GPT / Claude / DeepSeek consensus)
@@ -211,7 +211,7 @@ docker run --rm -it ultimate-security-audit
 
 <div align="center">
 
-**[📢 Release v1.02](https://github.com/Trace520/ultimate-security-audit/releases/tag/v1.02)** ·
+**[📢 Release v1.0.0](https://github.com/Trace520/ultimate-security-audit/releases/tag/v1.0.0)** ·
 **[🐛 Report a bug](https://github.com/Trace520/ultimate-security-audit/issues/new?template=bug_report.md)** ·
 **[✨ Request a feature](https://github.com/Trace520/ultimate-security-audit/issues/new?template=feature_request.md)**
 
