@@ -1,87 +1,178 @@
-#🛡️ 安全审核代理技能
+<div align="center">
 
-[英语](现在我们要做些什么?) | [简体中文](#中文版)
+# 🛡️ Ultimate Security Audit
 
-![美国](https://github.com/Trace520/ultimate-security-audit/actions/workflows/ci.yml/badge.svg)
-![许可证](https://img.shields.io/badge/license-MIT-blue.svg)
+**结构化代码 & 架构审查的 AI Agent 技能**
 
-> 让 AI Agent 化身无情的白帽审计机器：内置三阶漏斗模型、强制工具链路由与防幻觉记忆机制。告别 AI 的废话与无脑拒答。
+[![CI](https://github.com/Trace520/ultimate-security-audit/actions/workflows/ci.yml/badge.svg)](https://github.com/Trace520/ultimate-security-audit/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/badge/release-v1.02-blue?logo=github)](https://github.com/Trace520/ultimate-security-audit/releases/tag/v1.02)
+[![License](https://img.shields.io/badge/license-MIT%20%2B%20Security%20Terms-green)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Claude%20Code%20%7C%20Cursor%20%7C%20OpenAI%20API-purple)](#-全平台支持矩阵)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](CONTRIBUTING.md)
+
+**[English](#-english-version) · [简体中文](#-简体中文)**
+
+</div>
 
 ---
 
-<一个标签:="中文版"></一个>
-## 🇨🇳 中文版
+<a id="-简体中文"></a>
 
-### 💡 解决的痛点
+## 🎯 这是什么
 
-- **拒绝死循环**：通过严谨的“红队靶场”上下文覆盖，消除 AI 无限索要授权的问题。
-- **拒绝上下文爆炸**：独创三阶漏斗（侦察 -> 中间件降维 -> 重型攻坚），极大节省 Token。
-- **拒绝幻觉**：强制将证据写入本地 `reverse_notes.md`，所有结论必须有源可溯。
+一个可移植的 AI Agent 技能，把任意大模型变成**结构化的代码与架构审查员**。它不直接下结论，而是强制走三阶漏斗、写证据链、引用具体行号，避免"AI 一本正经地胡说八道"。
 
-### 🌟 全平台支持矩阵
+## ✨ 核心亮点
+
+| 能力 | 解决什么问题 |
+| :--- | :--- |
+| 🪣 **三阶漏斗模型** | 静态发现 → 中间层降维 → 深度推演，不跳步 |
+| 🔍 **证据溯源** | 所有结论必须绑定文件 + 行号，信息不足直接说"不确定" |
+| 🧠 **防幻觉记忆** | 审查笔记实时写入 `reverse_notes.md`，可追溯可复盘 |
+| 🛠 **工具链路由** | 自动引导 Playwright MCP / webcrack / Ghidra / jadx |
+| 🌐 **全平台兼容** | Claude Code / Cursor / ChatGPT / Kimi / 豆包 / OpenAI API |
+
+## 🪣 工作流
+
+```text
+┌─────────────────────┐    ┌─────────────────────┐    ┌─────────────────────┐
+│  ① 静态发现          │ -> │  ② 中间层降维        │ -> │  ③ 深度推演          │
+│                     │    │                     │    │                     │
+│  · 扫描入口点        │    │  · 反混淆 / 反编译   │    │  · 数据流追踪       │
+│  · 提取 API 路径     │    │  · 还原关键函数      │    │  · 构造 PoC          │
+│  · 识别可疑模式      │    │  · 流量拦截 / HAR   │    │  · 输出标准报告     │
+└─────────────────────┘    └─────────────────────┘    └─────────────────────┘
+           │                          │                          │
+           └──────────────┬───────────┴──────────────┬──────────────┘
+                          ▼                            ▼
+                  📝 reverse_notes.md（证据链）   📄 audit_report.md（结论）
+```
+
+## 🚀 全平台支持矩阵
 
 | 平台类型 | 使用方式 | 对应文件 |
 | :--- | :--- | :--- |
-| **克劳德代码/光标/工作伙伴** | 原生技能加载（放入 skills 目录） | `skill/SKILL.md` |
-| **ChatGPT / Kimi / 豆包 网页版** | 复制粘贴作为系统提示词 | `系统的提示` |
-| **Python / 自动化脚本** | 作为 System Message 注入 API | `美国政府` |
+| **Claude Code / Cursor / 其他 Agent 运行时** | 原生技能加载（放入 skills 目录） | `skill/SKILL.md` |
+| **ChatGPT / Kimi / 豆包 网页版** | 复制粘贴作为系统提示词 | `prompt/system_prompt.txt` |
+| **Python / 自动化脚本** | 作为 System Message 注入 | `api/openai_compatible.py` |
 
-### 🚀 快速开始
+## 🚦 快速开始
 
-**方式一：克隆至 Agent 技能目录（以 Claude Code 为例）**
-```猛击
-git克隆https://github.com/Trace520/ultimate-security-audit.git~/.claude/skillips/终极安全审核
+> **前置要求**：Python 3.10+；如需 Agent 技能加载，客户端需支持本地技能目录（Claude Code / Cursor）。
+
+**方式 A：克隆至 Agent 技能目录**
+
+```bash
+git clone https://github.com/Trace520/ultimate-security-audit.git ~/.claude/skills/ultimate-security-audit
 ```
 
-方式二：Docker 快速体验
+**方式 B：Python 直跑**
 
-```猛击
-# 构建镜像
-Docker构建-t最终-安全-审计。
+```bash
+git clone https://github.com/Trace520/ultimate-security-audit.git
+cd ultimate-security-audit
 
-# 运行容器
-Docker run-rm-it最终-安全-审核
+pip install openai
+export OPENAI_API_KEY=sk-xxxx        # Windows: set OPENAI_API_KEY=sk-xxxx
+
+python api/openai_compatible.py
 ```
 
-📂 仓库结构
+**方式 C：Docker（自带 Playwright 运行时）**
 
-· skill/ - 原生 Agent 技能核心文件（SKILL.md）
-· prompt/ - 适用于网页版大模型的纯文本提示词
-· api/ - Python 自动化集成脚本
-· examples/ - 真实运行演示（包含代码样本、证据链笔记、Mermaid 审计报告）
-🛡️ 终极安全审核代理技能
+```bash
+docker build -t ultimate-security-audit .
+docker run --rm -it ultimate-security-audit
+```
 
-⚠️ 免责声明
+## 📂 仓库结构
 
-本项目仅用于合法的企业级软件安全审计、自有资产测试及已获授权的红队演练。严禁用于任何未授权的恶意攻击行为。 使用前请务必阅读 DISCLAIMER.md 及 SECURITY.md。
+```text
+ultimate-security-audit/
+├── README.md
+├── LICENSE                  # MIT + 安全工具附加条款
+├── Dockerfile
+├── skill/
+│   └── SKILL.md             # 原生 Agent 技能定义
+├── prompt/
+│   └── system_prompt.txt    # 网页端系统提示词
+├── api/
+│   └── openai_compatible.py # OpenAI 兼容 Python 客户端
+├── docs/
+│   └── toolchain.md         # Playwright / webcrack / Ghidra / jadx
+├── examples/
+│   ├── sample_code.js       # 演示样本
+│   ├── reverse_notes.md     # 证据链笔记示例
+│   └── audit_report.md     # 标准审计报告示例
+└── .github/
+    ├── ISSUE_TEMPLATE/
+    └── workflows/ci.yml
+```
+
+## 📚 更多文档
+
+- [底层工具链配置指南](docs/toolchain.md)
+- [示例：对演示样本的审计输出](examples/audit_report.md)
+- [安全策略（漏洞披露）](SECURITY.md)
+- [贡献指南](CONTRIBUTING.md)
+- [行为准则](CODE_OF_CONDUCT.md)
+
+## ⚠️ 免责声明
+
+本项目仅用于合法的企业级软件安全审计、自有资产测试、开源项目分析及已授权的安全研究。使用者需确保对审查目标拥有合法授权；严禁用于任何未授权的逆向、破解或攻击行为。详见 [DISCLAIMER.md](DISCLAIMER.md)。
 
 ---
 
-<一个标签:="英语版本"></一个>
+<a id="-english-version"></a>
 
-🇬🇧 英文版
+## 🌐 English Version
 
-终极安全审核代理技能
+### What is this?
 
-企业级代码审查和自动化逆向工程AI代理工作流技能。
+A portable AI Agent skill that turns any LLM into a **structured code & architecture reviewer**. Instead of jumping to conclusions, it enforces a three-stage funnel, writes an evidence trail, and cites specific file/line references — so the output is auditable, not hallucinated.
 
-✨ 功能
+### Why use it
 
-·三级漏斗：强制AI执行“静态侦察->中间件去模糊->深度分析”，保存令牌，防止幻觉。
-·上下文覆盖：内置红队演练上下文，绕过AI重复的授权提示。
-·抗幻觉存储器：在得出结论之前，强制AI将证据(API路径、伪代码)写入本地reverse_notes.md。
-·Toolchain路由：根据目标特性自动路由到Playwright MCP(流量捕获)、webcrack(去模糊处理)或jadx(反编译)。
+| Capability | Problem solved |
+| :--- | :--- |
+| 🪣 **Three-stage funnel** | Static discovery → intermediate deobfuscation → deep deduction, no skipping |
+| 🔍 **Evidence-first** | Every claim must cite a file and line; "uncertain" is a valid answer |
+| 🧠 **Anti-hallucination log** | Review notes appended to `reverse_notes.md` in real time |
+| 🛠 **Tool routing** | Guides Playwright MCP / webcrack / Ghidra / jadx based on target type |
+| 🌐 **Any platform** | Claude Code, Cursor, ChatGPT, Kimi, Doubao, or any OpenAI-compatible API |
 
-🚀 快速入门
+### Quick start
 
-```猛击
-git克隆https://github.com/Trace520/ultimate-security-audit.git~/.claude/skillips/终极安全审核
+```bash
+# Option 1: as a native agent skill
+git clone https://github.com/Trace520/ultimate-security-audit.git ~/.claude/skills/ultimate-security-audit
+
+# Option 2: Python
+pip install openai
+export OPENAI_API_KEY=sk-xxxx
+python api/openai_compatible.py
+
+# Option 3: Docker (with Playwright runtime)
+docker build -t ultimate-security-audit .
+docker run --rm -it ultimate-security-audit
 ```
 
-⚠️ 免责声明
+### Platforms
 
-此工具严格用于授权安全测试、资产审计和红色团队演练。有关详细信息，请参阅DISCLAIMER.MD。
+| Platform | How to use | File |
+| :--- | :--- | :--- |
+| Claude Code / Cursor / agent runtimes | Load as a native skill | `skill/SKILL.md` |
+| ChatGPT / Kimi / Doubao web UIs | Paste as system prompt | `prompt/system_prompt.txt` |
+| Python / automation | Inject as system message | `api/openai_compatible.py` |
+
+### Disclaimer
+
+This project is for legitimate security auditing of your own assets, open-source code analysis, and authorized engagements only. You must have explicit written permission before testing any third-party system. See [DISCLAIMER.md](DISCLAIMER.md) and the additional terms in [LICENSE](LICENSE).
 
 ---
 
-如果这个项目对你有帮助，请考虑给它安0！
+<div align="center">
+
+**[📢 Release v1.02](https://github.com/Trace520/ultimate-security-audit/releases/tag/v1.02)** · **[Report a bug](https://github.com/Trace520/ultimate-security-audit/issues/new?template=bug_report.md)** · **[Request a feature](https://github.com/Trace520/ultimate-security-audit/issues/new?template=feature_request.md)**
+
+</div>
