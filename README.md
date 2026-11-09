@@ -215,7 +215,7 @@ ultimate-security-audit/
 │   └── assets/
 │       └── audit_notes.template.md
 ├── prompt/
-│   └── system_prompt.txt    # 网页端系统提示词
+│   └── system_prompt.txt    # 网页端系统提示词（V2.0 对齐）
 ├── api/
 │   └── openai_compatible.py # OpenAI 兼容 Python 客户端
 ├── docs/
@@ -223,8 +223,8 @@ ultimate-security-audit/
 │   └── CAPABILITIES.md      # 一页速查：三个相关产物的能力边界
 ├── examples/
 │   ├── sample_code.js       # 演示样本
-│   ├── reverse_notes.md     # 证据链笔记示例
-│   └── audit_report.md      # 标准审计报告示例
+│   ├── audit_notes.md       # 证据链笔记示例（已填好）
+│   └── audit_report.md      # 六段式审计报告示例
 └── .github/
     ├── ISSUE_TEMPLATE/
     └── workflows/ci.yml
