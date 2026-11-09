@@ -67,13 +67,10 @@
 
 ## 📥 输入 / 输出契约
 
-**你给它什么：**
-- 一段代码片段（直接贴）
-- 一个本地文件路径或目录
-- 一个 URL（引导你用 Playwright MCP 抓）
-- 一个样本二进制（引导 jadx / Ghidra）
+**你给它什么：** 一段代码片段 · 一个本地路径或目录 · 一个 URL（引导 Playwright MCP 抓包） · 一个样本二进制（引导 jadx / Ghidra）。
 
 **它给你什么（六段式报告）：**
+
 1. 📌 审计结论（一句话定性 + 最高风险等级）
 2. 🗺️ 逻辑流图（Mermaid 状态机）
 3. 🔗 证据溯源（`[STATIC]` / `[DYNAMIC]` / `[REVERSE]` / `[HTTP]`，每条带位置）
@@ -150,7 +147,7 @@ run: python scripts/run_audit.py --targets "$AUDIT_TARGETS"
   <img src="https://img.shields.io/badge/-GitHub%20Actions-2088FF?logo=githubactions&logoColor=white&style=flat-square" />
   <img src="https://img.shields.io/badge/-Ghidra-2C2D72?logo=gnu%20emacs&logoColor=white&style=flat-square" />
   <img src="https://img.shields.io/badge/-jadx-FF6B00?style=flat-square" />
-  <img src="https://img.shields.io/badge/-OWASP%20LLM%20Top%2010%202025-123?style=flat-square" />
+  <img src="https://img.shields.io/badge/-OWASP%20LLM%20Top%2010%202025-8b5cf6?style=flat-square" />
 </p>
 
 ## 🔌 外部工具依赖（按需安装）
@@ -230,14 +227,6 @@ ultimate-security-audit/
     └── workflows/ci.yml
 ```
 
-## 🗺 路线图
-
-- [x] **v1.0.0** — 初始发布：三阶漏斗、全平台支持、CI、Docker、社区健康文件
-- [x] **v1.1** — README 升级为实用规格（工作流表 + 输入/输出契约）、CI 跨平台矩阵、pathlib 重构
-- [x] **v2.0** — 工业级升级：双授权模式（交互 + CI 流水线）、强制证据自检、六段式报告、OWASP LLM Top 10 2025 条件映射、references/ + assets/ 渐进披露结构
-- [ ] **v2.1** — iOS / Android 客户端样本专项流程
-- [ ] **v2.2** — Markdown / HTML 双格式报告导出
-
 ## ⚠️ 免责声明
 
 > [!WARNING]
@@ -245,14 +234,7 @@ ultimate-security-audit/
 
 ## 📚 更多文档
 
-- [技能主控指令（V2.3.0）](skill/SKILL.md)
-- [CI 流水线模式契约](skill/references/ci-pipeline-mode.md)
-- [授权边界与数据处理](skill/references/authorization-and-handling.md)
-- [审计报告规范](skill/references/audit-report.md)
-- [一页速查：三个产物能力边界](docs/CAPABILITIES.md)
-- [底层工具链配置指南](docs/toolchain.md)
-- [安全策略（漏洞披露）](SECURITY.md)
-- [贡献指南](CONTRIBUTING.md)
+[技能主控](skill/SKILL.md) · [CI 模式契约](skill/references/ci-pipeline-mode.md) · [授权边界](skill/references/authorization-and-handling.md) · [报告规范](skill/references/audit-report.md) · [能力速查](docs/CAPABILITIES.md) · [工具链](docs/toolchain.md) · [安全策略](SECURITY.md) · [贡献指南](CONTRIBUTING.md)
 
 ---
 
@@ -263,7 +245,7 @@ ultimate-security-audit/
 > [!NOTE]
 > This is not an automated scanner (not Semgrep/CodeQL) and not an exploit generator. It's an **industrial-grade process spec**: forces the LLM through three fixed stages, gates every engagement on explicit authorization, persists an evidence chain to local files, self-checks evidence before drawing conclusions, and supports unattended CI-pipeline runs bound to an approval ID + explicit target list. Output is an auditable six-section report.
 
-## What it actually does
+## What it does
 
 Instead of jumping straight to a conclusion, the skill forces the LLM through a **three-stage funnel** with a paper trail at each step:
 
@@ -297,6 +279,26 @@ Instead of jumping straight to a conclusion, the skill forces the LLM through a 
 
 OWASP LLM Top 10 2025 mapping is **conditional**: only when the target is itself an LLM/Agent app (prompt, tool schema, vector store, openai/langchain/mcp dependency) does the findings table get a compliance column. Each tag must trace back to one piece of evidence; year-pinned numbers are required (2025 ≠ 2023). Non-LLM targets write `[compliance: N/A]`.
 
+## Core capabilities
+
+| Capability | Notes |
+| :--- | :--- |
+| 🪣 **Three-stage funnel** | Static → deobfuscation → deduction; no skipped stages |
+| 🚦 **Dual authorization** | Interactive + CI-pipeline approval-bound, fail-closed on missing fields |
+| 🔍 **Forced evidence self-check** | Reads `audit_notes.md` before concluding; marks missing evidence |
+| 📋 **Six-section report** | Conclusion / flow / evidence / findings / PoC / remediation |
+| 🛠 **Toolchain routing** | webcrack / Playwright MCP / Ghidra / jadx / leanrea by target type |
+| ⚖️ **Conditional compliance mapping** | OWASP LLM Top 10 2025 only for LLM/Agent targets |
+| 🌐 **Multi-platform** | Claude Code / Cursor / ChatGPT / Kimi / Doubao / OpenAI API |
+
+## Platform matrix
+
+| Platform | How to use | File |
+| :--- | :--- | :--- |
+| **Claude Code / Cursor** | Native skill load | [`skill/SKILL.md`](skill/SKILL.md) + [`skill/references/`](skill/references/) |
+| **ChatGPT / Kimi / Doubao web** | Paste as system prompt | `prompt/system_prompt.txt` |
+| **Python / automation** | Inject as system message | `api/openai_compatible.py` |
+
 ## Quick start
 
 ```bash
@@ -315,14 +317,6 @@ docker run --rm -it ultimate-security-audit
 # Option D: CI (unattended)
 # AUTHORIZATION_MODE=CI_PIPELINE, AUDIT_APPROVAL_ID, AUDIT_TARGETS required
 ```
-
-## Roadmap
-
-- [x] **v1.0.0** — Initial release
-- [x] **v1.1** — README as practical spec, cross-platform CI matrix, pathlib refactor
-- [x] **v2.0** — Industrial upgrade: dual auth (interactive + CI pipeline), forced evidence self-check, six-section report, conditional OWASP LLM 2025 mapping, progressive-disclosure references/assets
-- [ ] **v2.1** — iOS / Android client sample flows
-- [ ] **v2.2** — Markdown / HTML dual-format report export
 
 ## Disclaimer
 
