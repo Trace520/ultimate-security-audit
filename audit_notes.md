@@ -23,3 +23,5 @@
 - 3.0：`usa` 增加 `--format/--out/--stage/--verify/--waive/--state/--sca`，版本号统一为 3.0.0。
 - 3.0：CI 增加自我审计并上传 SARIF；`make check` 增加 SARIF 冒烟。
 - 2.x 遗留说明：`README` 与 `SKILL.md` 的版本徽章此前指向 v2.x，本版一并对齐。
+- 3.0 发布：`SKILL.md` 压至 25 行入口契约（三条铁律 + 三阶漏斗 + 工具入口），细节全部沉入 `references/`。
+- 3.0 发布：`v3.0.0` tag 与 Release 已发布，Release Notes 见 `RELEASE_NOTES_v3.0.0.md`。
