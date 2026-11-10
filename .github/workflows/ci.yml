@@ -1,5 +1,9 @@
 name: CI & Self-Audit
 
+env:
+  PYTHONUTF8: "1"
+  PYTHONIOENCODING: "utf-8"
+
 on:
   push:
     branches: [main, master]
@@ -45,7 +49,7 @@ jobs:
         run: |
           python -B scripts/run_audit.py tests/fixtures/sample --approval-id CHG-SMOKE \
             --format sarif --out results.sarif --allow-findings
-          python -B -c "import json;d=json.load(open('results.sarif'));assert d['version']=='2.1.0';assert d['runs'][0]['tool']['driver']['version']=='3.0.0';print('sarif ok')"
+          python -B -c "import json;d=json.load(open('results.sarif', encoding='utf-8'));assert d['version']=='2.1.0';assert d['runs'][0]['tool']['driver']['version']=='3.0.0';print('sarif ok')"
       - name: 状态机必须拦住跳步
         shell: bash
         run: |
@@ -104,7 +108,7 @@ jobs:
         run: |
           usa . --approval-id CI-SELF-AUDIT --format sarif \
             --out results.sarif --allow-findings
-          python -B -c "import json;d=json.load(open('results.sarif'));print('results:',len(d['runs'][0]['results']))"
+          python -B -c "import json;d=json.load(open('results.sarif', encoding='utf-8'));print('results:',len(d['runs'][0]['results']))"
       - name: Upload SARIF to GitHub Security
         uses: github/codeql-action/upload-sarif@v3
         with:
