@@ -2,7 +2,7 @@
 
 ## 用途限制
 
-本仓库提供的内容（包括但不限于 `skill/SKILL.md`、`prompt/system_prompt.txt`、`examples/` 中的示例代码、`api/` 中的脚本）仅用于以下合法场景：
+本仓库提供的内容（包括但不限于 `SKILL.md`、`prompt/system_prompt.txt`、`examples/` 中的示例代码、`api/` 中的脚本）仅用于以下合法场景：
 
 - 你**自己拥有**的系统或代码的安全审计；
 - 你**已获得明确书面授权**的客户系统或第三方资产的测试；

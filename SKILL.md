@@ -120,7 +120,7 @@ BLOCKED 不套用上述格式，改为：
 | 外部依赖 | 承担的角色 | 缺失时的本地等价做法 |
 |---|---|---|
 | `rea-leanrea-router` | 阶段一 / 三的引擎选型 | 按第 2 节优先级裁定自行判定，不加载 router；选型理由写进 `audit_notes.md` |
-| `leanrea` CLI / `project_probe.py` | 资产摸底、清单与技术栈识别 | `python scripts/run_audit.py --targets <目标>`（阶段一规则扫描）+ `file` / `strings` / `grep -rn` / `asar list` |
+| `leanrea` CLI / `scripts/project_probe.py` | 资产摸底、清单与技术栈识别 | `python scripts/run_audit.py --targets <目标>`（阶段一规则扫描）+ `file` / `strings` / `grep -rn` / `asar list` |
 | `REA` 深度引擎（Ghidra / Hopper） | 伪代码还原 | 只交付已落盘静态事实，相关结论标 `[证据缺失] 需进一步侦察` |
 | `context-mode` 一类切片工具 | 大文件降维、防止上下文撑爆 | `grep -n` 定位函数边界 + `sed -n 'a,bp'` 分段读取，或按函数手工切片 |
 | Playwright MCP / Fetch MCP | 抓包、登录态复现 | 退化为纯静态，`[DYNAMIC]` 条目标注缺失原因，不伪造流量证据 |
@@ -133,6 +133,16 @@ BLOCKED 不套用上述格式，改为：
 - **标记降级**：在报告头下方**单独一行**输出 `[DEGRADED: external_skills_missing]`，并在风险段写明缺哪一项、对结论可信度的影响。不要把它塞进 0.2 的固定首行标记，两者互不覆盖。
 
 第 0 节的授权门控不受降级影响：缺引擎可以只做静态，缺授权必须停。
+
+### 3.2 能力探测（`scripts/skill_probe.py`）
+
+阶段一开始前跑 `python scripts/skill_probe.py`，输出一行 JSON（`rea-leanrea-router`、`context-mode`、`rg`、`grep` 四项布尔），按结果为 3.1 选定本地等价做法。降级时把结构化标记写进报告 `warnings`：
+
+```json
+{"code": "DEGRADED", "missing": ["context-mode"], "fallback": "rg -n"}
+```
+
+需要「全量引擎才算合格」的流水线可加 `--strict`：任一能力缺失即 `BLOCKED`，退出码 `2`。
 
 ## 4. 防幻觉与本地记忆 (Anti-Hallucination)
 
@@ -217,3 +227,6 @@ BLOCKED 不套用上述格式，改为：
 - `references/ci-pipeline-mode.md` — 无人值守模式的环境变量契约、三态判定流程、输出头格式、CI 配置示例、责任边界与反例。CI 环境或被问及自动化接入时加载。
 - `assets/audit_notes.template.md` — `audit_notes.md` 结构模板，含授权声明、分阶段证据、攻击面假设、缺陷跟踪与清理记录。进入阶段二前复制到工作目录。
 - `scripts/run_audit.py` — 仓库根目录的 CI 门控与阶段一静态侦察参考实现（stdlib only，不联网、不执行目标代码）。需要可复算的授权判定或无人值守入口时加载。
+- `scripts/project_probe.py` — 阶段一扫描引擎：10 条规则、确定性输出、只读不执行。
+- `scripts/skill_probe.py` — 外部能力探测，对应 3.1 / 3.2 的降级矩阵。
+- `scripts/check_docs.py` — 文档死链校验，`make check` 与 CI 都会跑。

@@ -53,7 +53,7 @@
 
 **铁律：**
 - 每个结论必须引用具体文件 + 行号；找不到证据就写 `[证据缺失] 需进一步侦察`，不准编。
-- 中间发现按时间追加到 `audit_notes.md`（模板见 `skill/assets/audit_notes.template.md`），多轮对话不丢上下文。
+- 中间发现按时间追加到 `audit_notes.md`（模板见 `assets/audit_notes.template.md`），多轮对话不丢上下文。
 - 需要工具时（抓包、反编译）必须显式调用，不准凭想象猜；引擎缺失时退化为纯静态并标注降级原因。
 
 ## 🔐 V2.0 新增：双授权模式
@@ -63,7 +63,7 @@
 | **交互模式**（默认） | 对话中直接发起审计 | 当前会话声明 / 审批编号 / 书面授权 | 门控确认后走三阶漏斗 |
 | **CI 流水线模式** | `AUTHORIZATION_MODE=CI_PIPELINE` | `AUDIT_APPROVAL_ID` + `AUDIT_TARGETS` + CI 上下文交叉核对 | 三态判定：**EXECUTE** 静默执行 / **BLOCKED** 缺字段即停 / **DEGRADED** 仅静态侦察 |
 
-> **模式开关本身不是授权**。任何进程都能设置环境变量，技能只认审批编号与目标清单两个可核对字段，缺一项即中止。详见 [`skill/references/ci-pipeline-mode.md`](skill/references/ci-pipeline-mode.md)。
+> **模式开关本身不是授权**。任何进程都能设置环境变量，技能只认审批编号与目标清单两个可核对字段，缺一项即中止。详见 [`references/ci-pipeline-mode.md`](references/ci-pipeline-mode.md)。
 
 ## 📥 输入 / 输出契约
 
@@ -92,13 +92,13 @@
 | ⚖️ **条件式合规映射** | 仅 LLM 目标加 OWASP LLM Top 10 2025 标签，编号不混用 |
 | 🌐 **全平台兼容** | Claude Code / Cursor / ChatGPT / Kimi / 豆包 / OpenAI API |
 
-> 一页速查（三个相关产物能干什么）见 [`docs/CAPABILITIES.md`](docs/CAPABILITIES.md)。
+> 一页速查（三个相关产物能干什么）见 [`CAPABILITIES.md`](CAPABILITIES.md)。
 
 ## 🚀 全平台支持矩阵
 
 | 平台类型 | 使用方式 | 对应文件 |
 | :--- | :--- | :--- |
-| **Claude Code / Cursor 等 Agent** | 原生技能加载（放入 skills 目录） | [`skill/SKILL.md`](skill/SKILL.md) + [`skill/references/`](skill/references/) + [`skill/assets/`](skill/assets/) |
+| **Claude Code / Cursor 等 Agent** | 原生技能加载（放入 skills 目录） | [`SKILL.md`](SKILL.md) + [`references/`](references/) + [`assets/`](assets/) |
 | **ChatGPT / Kimi / 豆包 网页版** | 复制粘贴作为系统提示词 | `prompt/system_prompt.txt` |
 | **Python / 自动化脚本** | 作为 System Message 注入 | `api/openai_compatible.py` |
 
@@ -159,7 +159,7 @@ run: python scripts/run_audit.py --targets "$AUDIT_TARGETS"
 - **jadx** — Android APK 反编译
 - **Ghidra** — 原生二进制逆向
 
-详见 [`docs/toolchain.md`](docs/toolchain.md)。
+详见 [`references/toolchain.md`](references/toolchain.md)。
 
 ## ❓ 常见问题
 
@@ -202,22 +202,34 @@ ultimate-security-audit/
 ├── README.md
 ├── LICENSE                  # MIT + 安全工具附加条款
 ├── Dockerfile
-├── skill/
-│   ├── SKILL.md             # 主控指令（V2.3.0，渐进披露）
-│   ├── references/          # 按需加载的执行细则
-│   │   ├── audit-workflow.md
-│   │   ├── audit-report.md
-│   │   ├── authorization-and-handling.md
-│   │   └── ci-pipeline-mode.md
-│   └── assets/
-│       └── audit_notes.template.md
+├── SKILL.md                 # 主控指令（V2.3.0，渐进披露）
+├── CAPABILITIES.md          # 一页速查：四个入口的能力边界
+├── audit_notes.md           # 仓库级变更记录
+├── Makefile                 # make check：文档 + 测试 + 门控
+├── pyproject.toml
+├── references/              # 按需加载的执行细则
+│   ├── audit-workflow.md
+│   ├── audit-report.md
+│   ├── authorization-and-handling.md
+│   ├── ci-pipeline-mode.md
+│   └── toolchain.md         # Playwright / webcrack / Ghidra / jadx
+├── assets/
+│   └── audit_notes.template.md
+├── scripts/
+│   ├── run_audit.py         # 门控入口（fail-closed）
+│   ├── project_probe.py     # 阶段一扫描引擎
+│   ├── skill_probe.py       # 外部能力探测
+│   └── check_docs.py        # 文档死链校验
+├── tests/
+│   ├── sandbox_test.py
+│   ├── test_golden.py
+│   ├── test_repo_integrity.py
+│   ├── test_skill_probe.py
+│   └── fixtures/            # sample/ 与 expected_report.json
 ├── prompt/
 │   └── system_prompt.txt    # 网页端系统提示词（V2.0 对齐）
 ├── api/
 │   └── openai_compatible.py # OpenAI 兼容 Python 客户端
-├── docs/
-│   ├── toolchain.md         # Playwright / webcrack / Ghidra / jadx
-│   └── CAPABILITIES.md      # 一页速查：三个相关产物的能力边界
 ├── examples/
 │   ├── sample_code.js       # 演示样本
 │   ├── audit_notes.md       # 证据链笔记示例（已填好）
@@ -234,7 +246,7 @@ ultimate-security-audit/
 
 ## 📚 更多文档
 
-[技能主控](skill/SKILL.md) · [CI 模式契约](skill/references/ci-pipeline-mode.md) · [授权边界](skill/references/authorization-and-handling.md) · [报告规范](skill/references/audit-report.md) · [能力速查](docs/CAPABILITIES.md) · [工具链](docs/toolchain.md) · [安全策略](SECURITY.md) · [贡献指南](CONTRIBUTING.md)
+[技能主控](SKILL.md) · [CI 模式契约](references/ci-pipeline-mode.md) · [授权边界](references/authorization-and-handling.md) · [报告规范](references/audit-report.md) · [能力速查](CAPABILITIES.md) · [工具链](references/toolchain.md) · [安全策略](SECURITY.md) · [贡献指南](CONTRIBUTING.md)
 
 ---
 
@@ -295,7 +307,7 @@ OWASP LLM Top 10 2025 mapping is **conditional**: only when the target is itself
 
 | Platform | How to use | File |
 | :--- | :--- | :--- |
-| **Claude Code / Cursor** | Native skill load | [`skill/SKILL.md`](skill/SKILL.md) + [`skill/references/`](skill/references/) |
+| **Claude Code / Cursor** | Native skill load | [`SKILL.md`](SKILL.md) + [`references/`](references/) |
 | **ChatGPT / Kimi / Doubao web** | Paste as system prompt | `prompt/system_prompt.txt` |
 | **Python / automation** | Inject as system message | `api/openai_compatible.py` |
 

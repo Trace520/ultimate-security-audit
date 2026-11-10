@@ -20,4 +20,4 @@ Use the private channel below:
 
 This policy applies to the skill files, examples, and tooling in this repository.
 
-It does **not** cover the third-party tools referenced in `docs/toolchain.md` (Playwright, webcrack, Ghidra, jadx). Please report issues with those tools to their respective maintainers.
+It does **not** cover the third-party tools referenced in `references/toolchain.md` (Playwright, webcrack, Ghidra, jadx). Please report issues with those tools to their respective maintainers.

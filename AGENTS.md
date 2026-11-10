@@ -25,13 +25,13 @@ When operating in or on this repository:
 
 | Path | Purpose |
 | :--- | :--- |
-| `skill/SKILL.md` | Native skill definition (Claude Code / Cursor / similar) |
+| `SKILL.md` | Native skill definition (Claude Code / Cursor / similar) |
 | `prompt/system_prompt.txt` | Plain-text system prompt for web chat UIs |
 | `api/openai_compatible.py` | Minimal OpenAI-compatible client wrapper |
 | `scripts/run_audit.py` | CI gate + stage-one static recon CLI (stdlib only, offline, read-only) |
 | `examples/` | Self-contained demo fixtures and sample audit output |
-| `docs/toolchain.md` | Optional underlying tooling (Playwright, webcrack, Ghidra) |
-| `docs/CAPABILITIES.md` | One-page map of what each entry point can and cannot answer |
+| `references/toolchain.md` | Optional underlying tooling (Playwright, webcrack, Ghidra) |
+| `CAPABILITIES.md` | One-page map of what each entry point can and cannot answer |
 
 See [LICENSE](LICENSE), [DISCLAIMER.md](DISCLAIMER.md), and
 [SECURITY.md](SECURITY.md) for legal and reporting terms.
