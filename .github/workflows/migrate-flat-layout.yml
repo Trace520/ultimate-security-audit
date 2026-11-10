@@ -1,0 +1,25 @@
+name: migrate-flat-layout
+
+# 一次性迁移：把 skill/ 与 docs/ 扁平化到仓库根。
+# 完成提交后本工作流与 scripts/_migrate.py 都会被删除；
+# 只在自身被改动时触发，不会反复运行。
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/migrate-flat-layout.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    if: github.repository == 'Trace520/ultimate-security-audit'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Run migration
+        run: python3 scripts/_migrate.py
