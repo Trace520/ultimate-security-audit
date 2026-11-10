@@ -1,6 +1,6 @@
 # Capabilities
 
-一页速查。每个入口对应一件事，互不替代；判据细则在 `references/`，跑起来的证据落在运行时生成的 `audit_notes.md`。
+一页速查。每个入口对应一件事，互不替代；判据细则在 `references/`，跑起来的证据落在运行时生成的 `audit_notes.local.md`。
 
 ## 1. 四个入口
 
@@ -29,7 +29,7 @@ python -m scripts tests/fixtures/sample --approval-id CHG-001
 python scripts/run_audit.py --targets tests/fixtures/sample --approval-id CHG-001
 ```
 
-命中即返回 `1`（`--allow-findings` 可压回 `0`），`BLOCKED` 恒为 `2`。
+命中即返回 `1`（`--allow-findings` 可压回 `0`），`BLOCKED` 恒为 `2`。笔记默认写 `audit_notes.local.md`（已在 `.gitignore`），仓库根的 `audit_notes.md` 是变更记录，两者不要混。
 
 ## 3. 阶段一能答什么
 
