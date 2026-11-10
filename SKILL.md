@@ -1,5 +1,5 @@
 ---
-name: enterprise-security-audit
+name: ultimate-security-audit
 description: "Industrial-grade security audit and reverse-engineering pipeline. Routes by target characteristics across static reconnaissance, dynamic traffic capture, deobfuscation, and heavy decompilation engines. Enforces an authorization gate, evidence-chain persistence, a pre-conclusion evidence self-check, and produces traceable reports with severity-rated findings and minimal non-destructive verification scripts. Supports two authorization paths: interactive confirmation, and an unattended CI pipeline mode where authorization is bound to an approval ID plus an explicit target list injected by the pipeline, failing closed when either is missing. Use this skill for internal code audits, authorized red-team ranges, pre-release review, compliance checks, and protocol reconstruction on owned or explicitly authorized targets."
 description_zh: "工业级安全审计与逆向工程流水线：按目标特征路由静态逆向、动态抓包、反混淆与重型反编译引擎。强制授权前置、证据链固化与下结论前的证据自检，输出带证据溯源、缺陷分级与最小验证脚本的审计报告。支持交互确认与无人值守 CI 流水线两条授权路径：后者将授权绑定到审批编号与目标清单，缺任一项即中止。适用于自有资产、授权靶场与已获书面授权的安全评估。"
 description_en: "Industrial-grade security audit pipeline with target-based toolchain routing, dual authorization paths (interactive and approval-bound CI pipeline), evidence self-check, and traceable reporting. For owned or explicitly authorized targets only."
