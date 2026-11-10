@@ -28,6 +28,12 @@ EXIT_OK, EXIT_FINDINGS, EXIT_BLOCKED = 0, 1, 2
 
 sys.path.insert(0, str(SCRIPTS))
 
+import dep_scanner  # noqa: E402
+import report_formatter  # noqa: E402
+import state_manager  # noqa: E402
+
+VERSION = "3.0.0"
+
 PLACEHOLDER_APPROVAL = {
     "tbd", "todo", "none", "null", "n/a", "na", "-", "0000", "00000",
     "changeme", "example", "xxx", "placeholder",
@@ -142,7 +148,23 @@ def main() -> int:
                     help="有命中仍返回 0（供冒烟测试）")
     ap.add_argument("--strict", action="store_true",
                     help="外部能力缺失时直接 BLOCKED（退出码 2）")
+    ap.add_argument("--format", choices=["text", "json", "sarif"], default=None,
+                    help="输出格式，默认 text；--format sarif 供 Code Scanning")
+    ap.add_argument("--out", default=None, help="SARIF / JSON 输出文件路径")
+    ap.add_argument("--stage", choices=list(state_manager.STAGES), default=None,
+                    help="推进防幻觉状态机：discovery → verify → report")
+    ap.add_argument("--verify", action="append", default=None,
+                    help="verify 阶段核实的 finding id（可重复）")
+    ap.add_argument("--verify-all", action="store_true",
+                    help="verify 阶段一次性声明全部已核实（需人工确认后再用）")
+    ap.add_argument("--waive", action="append", default=None,
+                    help="明确放弃的 finding id（与 --verify 二选一）")
+    ap.add_argument("--state", default=None,
+                    help="状态文件，默认 .audit-state.json")
+    ap.add_argument("--sca", action="store_true",
+                    help="额外跑依赖漏洞扫描（OSV，需要网络；失败降级不编造）")
     a = ap.parse_args()
+    fmt = "json" if a.json else (a.format or "text")
 
     root = Path(a.repo_root).resolve() if a.repo_root else ROOT
     approval = (a.approval_id or "").strip() or _env("AUDIT_APPROVAL_ID")
@@ -211,11 +233,44 @@ def main() -> int:
                       f"targets: {len(targets)} | ci: {ci} | run: {run_id or '-'}]")
             if status == "DEGRADED":
                 header = header[:-1] + " | status: DEGRADED]"
-            print(header, file=sys.stderr) if a.json else print(header)
-            if not a.json:
+            print(header, file=sys.stderr) if fmt != "text" else print(header)
+            if fmt == "text":
                 for f in findings:
                     print(f"  {f['file']}:{f['line']} [{f['rule']}] {f['match']}")
                 print(f"[*] 扫描目标 {len(targets)} 个，可疑模式命中 {len(findings)} 条")
+
+    warnings: list[str] = []
+
+    # SCA：可选，唯一会联网的一步；拿不到数据就降级，不编造
+    if status != "BLOCKED" and a.sca:
+        dep_findings, dep_err, dep_notes = dep_scanner.scan(targets)
+        findings.extend(dep_findings)
+        warnings.extend(dep_notes)
+        if dep_err:
+            warnings.append(dep_err)
+            if status == "EXECUTE":
+                status, reason = "DEGRADED", dep_err
+
+    # 状态机：显式给 --stage 才强制，单次扫描保持向后兼容
+    state_path = Path(a.state) if a.state else Path(state_manager.DEFAULT_STATE)
+    state_info = ""
+    if a.stage and status != "BLOCKED":
+        verified = list(a.verify or [])
+        if a.verify_all:
+            verified = state_manager.load(state_path).get("discovery_ids", [])
+        ok, why, st = state_manager.advance(
+            state_path, a.stage,
+            approval=approval, targets=specs,
+            findings=findings if a.stage == "discovery" else None,
+            verified=verified, waived=list(a.waive or []),
+        )
+        state_info = state_manager.status_line(st)
+        if not ok:
+            status = "BLOCKED"
+            reason = why
+            print(f"[AUDIT_MODE: BLOCKED | missing: {why}]", file=sys.stderr)
+        else:
+            print(f"[STATE] {state_info}", file=sys.stderr)
 
     notes = Path(a.notes) if a.notes else Path("audit_notes.local.md")
     write_notes(notes, approval=approval, targets=specs, ci=ci, run_id=run_id,
@@ -228,10 +283,24 @@ def main() -> int:
         "warnings": [] if status == "EXECUTE" else [
             {"code": status, "reason": reason, "missing": blocked}],
     }
-    if a.json:
+    report["warnings"].extend({"code": "NOTE", "reason": w} for w in warnings)
+
+    if fmt == "sarif":
+        out = Path(a.out) if a.out else Path("results.sarif")
+        doc = report_formatter.to_sarif(
+            findings, version=VERSION, warnings=warnings,
+            invocation_uri=" ".join(sys.argv))
+        report_formatter.write(out, doc)
+        print(f"[*] SARIF：{out}（{len(findings)} 条结果）")
+    elif fmt == "json":
         print(json.dumps(report, ensure_ascii=False))
     elif status != "BLOCKED":
+        summary = report_formatter.summarize(findings)
         print(f"[*] 证据笔记：{notes}")
+        print(f"[*] 分级：error {summary['error']} / warning {summary['warning']}"
+              f" / note {summary['note']}")
+        if state_info:
+            print(f"[*] 状态机：{state_info}")
 
     if status == "BLOCKED":
         return EXIT_BLOCKED
