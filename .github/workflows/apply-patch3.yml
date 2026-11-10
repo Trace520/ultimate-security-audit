@@ -1,6 +1,6 @@
 name: apply-patch3
 
-# 一次性：跑 patch_utf8.py 修 Windows 编码，端完自己把脚本一起删了。
+# 一次性：跑 patch_utf8.py 修 Windows 编码，完事把脚本一起删。
 on:
   push:
     branches: [main]
@@ -15,6 +15,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - name: Patch
         shell: bash
         run: |
