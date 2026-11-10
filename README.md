@@ -2,347 +2,157 @@
 
 <img src="https://aka.doubaocdn.com/s/eopsS0yVb4" alt="Ultimate Security Audit" width="100%" />
 
-# 🛡️ Ultimate Security Audit
+# 🛡️ Ultimate Security Audit (USA)
 
-**工业级代码 & 架构安全审计 AI Agent 技能（V2.3.0）**
+**授权门控 + 防幻觉状态机 + SCA 供应链扫描 + SARIF 标准输出（V3.0.0）**
 
 [![CI](https://github.com/Trace520/ultimate-security-audit/actions/workflows/ci.yml/badge.svg)](https://github.com/Trace520/ultimate-security-audit/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/badge/release-v2.0-blue?logo=github&style=flat-square)](https://github.com/Trace520/ultimate-security-audit/releases/tag/v2.0)
+[![SARIF 2.1.0](https://img.shields.io/badge/report-SARIF%202.1.0-blue?style=flat-square)](references/audit-report.md)
+[![Python](https://img.shields.io/badge/python-3.10%20%7C%203.12-3776AB?logo=python&style=flat-square)](pyproject.toml)
 [![License](https://img.shields.io/badge/license-MIT%20%2B%20Security%20Terms-green?style=flat-square)](LICENSE)
-[![Python](https://img.shields.io/badge/python-3.10%2B-blue?logo=python&style=flat-square)](api/openai_compatible.py)
-[![Docker](https://img.shields.io/badge/docker-ready-blue?logo=docker&style=flat-square)](Dockerfile)
-[![stars](https://img.shields.io/github/stars/Trace520/ultimate-security-audit?style=flat-square)](https://github.com/Trace520/ultimate-security-audit/stargazers)
-[![forks](https://img.shields.io/github/forks/Trace520/ultimate-security-audit?style=flat-square)](https://github.com/Trace520/ultimate-security-audit/network/members)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](CONTRIBUTING.md)
-
-**[English](#-english) · [简体中文](#-中文)**
 
 </div>
 
 ---
 
-<a id="-中文"></a>
-
 > [!NOTE]
-> 它不是自动化扫描器（不是 Semgrep/CodeQL），也不是漏洞利用生成器。它是一套**工业级流程规范**——强制 AI 按三阶漏斗推进、把授权门控与证据链落盘到本地文件、下结论前先做证据自检，并在 CI 流水线里以审批编号 + 目标清单做无人值守授权。输出从"一段话说"变成"一份可复盘、可审计的六段式报告"。
+> 它不是 Semgrep/CodeQL 那类规则引擎，也不是漏洞利用生成器。它是一套**可断言的审计流水线**：授权先行、命中可复算、状态可追溯、报告能被 CI 直接消费。
 
-## 🎯 它到底做什么
+## 为什么需要它
 
-你把一段代码、一个 URL、或一个二进制样本丢给 AI，普通做法是它直接给结论，你分不清它是真看懂了还是在编。这个技能强制 AI 按**三阶漏斗**推进，每步留证据：
+AI 做安全审计有三个反复出现的问题：
 
-```
-  🔍 ① 静态发现
-  扫描入口 · 提取 API 路径 · 识别可疑模式
-        │
-        ▼
-  🔬 ② 中间层降维
-  反混淆 · 反编译 · 流量拦截 · 还原关键函数
-        │
-        ▼
-  🧠 ③ 深度推演
-  数据流追踪 · 构造 PoC · 输出标准报告
-```
+| 问题 | 表现 | USA 的答案 |
+|---|---|---|
+| **幻觉** | 推演到一半忘了入口点从哪来，凭「看起来像」下结论 | 强制状态机 `discovery → verify → report`，没核实的不许出报告 |
+| **格式孤立** | 报告只有人能读，CI / Code Scanning 消费不了 | 原生 SARIF 2.1.0，PR 里带行号标注 |
+| **维度单一** | 只扫自己的代码，不看第三方依赖的已知漏洞 | OSV 依赖扫描，拿不到数据就降级，绝不编造 |
 
-## 🔬 三步工作流（Agent 实际在做什么）
+外面还套了一层 **fail-closed 授权门控**：没有审批号，一行代码都不读。
 
-| 阶段 | AI 实际动作 | 产出落点 |
-| :--- | :--- | :--- |
-| **① 静态发现** | 读源码/抓包，列入口点（路由、导出函数、事件监听）、外部调用（fetch/XHR/socket）、可疑模式（eval、atob、硬编码密钥） | `audit_notes.md` 的"发现清单"段 |
-| **② 中间层降维** | 对混淆代码反混淆（webcrack）、对二进制反编译（jadx/Ghidra）、对前端流量用 Playwright MCP 拦截，还原关键函数真实逻辑 | `audit_notes.md` 的"还原"段 |
-| **③ 深度推演** | 从入口追数据流到 sink，判断可达性，构造最简 PoC，按严重度分级 | 六段式审计报告 |
+## 快速开始
 
-**铁律：**
-- 每个结论必须引用具体文件 + 行号；找不到证据就写 `[证据缺失] 需进一步侦察`，不准编。
-- 中间发现按时间追加到 `audit_notes.md`（模板见 `assets/audit_notes.template.md`），多轮对话不丢上下文。
-- 需要工具时（抓包、反编译）必须显式调用，不准凭想象猜；引擎缺失时退化为纯静态并标注降级原因。
-
-## 🔐 V2.0 新增：双授权模式
-
-| 模式 | 触发条件 | 授权依据 | 行为 |
-| :--- | :--- | :--- | :--- |
-| **交互模式**（默认） | 对话中直接发起审计 | 当前会话声明 / 审批编号 / 书面授权 | 门控确认后走三阶漏斗 |
-| **CI 流水线模式** | `AUTHORIZATION_MODE=CI_PIPELINE` | `AUDIT_APPROVAL_ID` + `AUDIT_TARGETS` + CI 上下文交叉核对 | 三态判定：**EXECUTE** 静默执行 / **BLOCKED** 缺字段即停 / **DEGRADED** 仅静态侦察 |
-
-> **模式开关本身不是授权**。任何进程都能设置环境变量，技能只认审批编号与目标清单两个可核对字段，缺一项即中止。详见 [`references/ci-pipeline-mode.md`](references/ci-pipeline-mode.md)。
-
-## 📥 输入 / 输出契约
-
-**你给它什么：** 一段代码片段 · 一个本地路径或目录 · 一个 URL（引导 Playwright MCP 抓包） · 一个样本二进制（引导 jadx / Ghidra）。
-
-**它给你什么（六段式报告）：**
-
-1. 📌 审计结论（一句话定性 + 最高风险等级）
-2. 🗺️ 逻辑流图（Mermaid 状态机）
-3. 🔗 证据溯源（`[STATIC]` / `[DYNAMIC]` / `[REVERSE]` / `[HTTP]`，每条带位置）
-4. 缺陷清单（严重度 / 触发条件 / 影响面 / 置信度）
-5. 🛠️ 最小验证脚本（PoC，不含破坏性载荷，凭据走环境变量）
-6. 修复建议与复测（方向 + 验收标准）
-
-**LLM/Agent 目标才加合规映射**：仅当目标本身是 LLM 应用（prompt / tool schema / 向量库 / openai·langchain·mcp 依赖）时，缺陷表加「合规项」列，标签从 OWASP LLM Top 10 2025 固定表取（LLM01 注入 / LLM02 敏感泄露 / LLM06 过度代理 / LLM07 系统提示词泄露 等），编号钉死年份，每个标签必须能指回一条证据。非 LLM 目标写 `[compliance: N/A — 非 LLM 目标]`，不硬套。
-
-## ✨ 核心能力
-
-| 能力 | 说明 |
-| :--- | :--- |
-| 🪣 **三阶漏斗模型** | 静态 → 降维 → 推演，不跳步、不越级下结论 |
-| 🚦 **双授权模式** | 交互确认 + CI 流水线审批绑定，缺字段 fail-closed |
-| 🔍 **证据自检（强制）** | 下结论前先读 `audit_notes.md`，无证据标 `[证据缺失]` |
-| 📋 **六段式报告** | 结论 / 流图 / 证据 / 缺陷 / PoC / 修复，评审友好 |
-| 🛠 **工具链路由** | webcrack / Playwright MCP / Ghidra / jadx / leanrea，按目标特征触发 |
-| ⚖️ **条件式合规映射** | 仅 LLM 目标加 OWASP LLM Top 10 2025 标签，编号不混用 |
-| 🌐 **全平台兼容** | Claude Code / Cursor / ChatGPT / Kimi / 豆包 / OpenAI API |
-
-> 一页速查（三个相关产物能干什么）见 [`CAPABILITIES.md`](CAPABILITIES.md)。
-
-## 🚀 全平台支持矩阵
-
-| 平台类型 | 使用方式 | 对应文件 |
-| :--- | :--- | :--- |
-| **Claude Code / Cursor 等 Agent** | 原生技能加载（放入 skills 目录） | [`SKILL.md`](SKILL.md) + [`references/`](references/) + [`assets/`](assets/) |
-| **ChatGPT / Kimi / 豆包 网页版** | 复制粘贴作为系统提示词 | `prompt/system_prompt.txt` |
-| **Python / 自动化脚本** | 作为 System Message 注入 | `api/openai_compatible.py` |
-
-## 🚦 快速开始
-
-> [!TIP]
-> **前置要求**：Python 3.10+；Agent 技能加载需要客户端支持本地技能目录（Claude Code / Cursor）。
-
-**方式 A：作为 Agent 技能**
 ```bash
-git clone https://github.com/Trace520/ultimate-security-audit.git ~/.claude/skills/ultimate-security-audit
+pip install -e .
+usa --help
 ```
-然后在对话里直接说："审计这个文件 xxx.js"，AI 会自动走三步流程并先确认授权。
 
-**方式 B：Python 直跑**
+第一次跑（把审批号换成本次任务的真实编号）：
+
 ```bash
-git clone https://github.com/Trace520/ultimate-security-audit.git
-cd ultimate-security-audit
-pip install openai
-export OPENAI_API_KEY=sk-xxxx        # Windows: set OPENAI_API_KEY=sk-xxxx
-python api/openai_compatible.py
+usa tests/fixtures/sample --approval-id CHG-2026-0417
 ```
 
-**方式 C：Docker（自带 Playwright 运行时）**
+```text
+[AUDIT_MODE: DEGRADED | approval: CHG-2026-0417 | targets: 1 | ci: none]
+  sample_code.js:5 [HARDCODED_SECRET] secret_key_123
+[*] 扫描目标 1 个，可疑模式命中 1 条
+[*] 分级：error 1 / warning 0 / note 0
+```
+
+没有审批号时：
+
+```text
+[AUDIT_MODE: BLOCKED | missing: AUTHORIZATION_MODE=CI_PIPELINE 或 --approval-id + 目标; AUDIT_APPROVAL_ID]
+exit=2
+```
+
+## 核心特性
+
+| 特性 | 说明 |
+|---|---|
+| 🔒 Fail-Closed 门控 | 缺审批号 / 占位值（`TBD`、`0000`）/ 目标越界 / 读不到 HEAD → `BLOCKED` + 退出码 `2`，且不打开目标文件 |
+| 🧠 防幻觉状态机 | 每条命中必须「核实」或「明确放弃」；跳步（没 discovery 就 verify、没 verify 就 report）直接 `BLOCKED` |
+| 📦 SCA 供应链扫描 | 只查锁定版本的 `requirements.txt` / `package-lock.json`，走 OSV `querybatch`；离线降级为 `DEGRADED` |
+| 📊 SARIF 2.1.0 | `--format sarif` 可直接上传 GitHub Code Scanning |
+| 🧾 证据落盘 | 授权段、命中表、未执行阶段写进 `audit_notes.local.md`（已 gitignore） |
+| 🪪 三入口等价 | `usa` / `python -m scripts` / `python scripts/run_audit.py` 共用同一套门控 |
+| 📄 确定性输出 | 同一目标同一 commit，扫描结果逐字节一致（`tests/test_golden.py` 守着） |
+
+## 三种典型用法
+
+**1. 本地快速扫描**
+
 ```bash
-docker build -t ultimate-security-audit .
-docker run --rm -it ultimate-security-audit
+usa ./src --approval-id CHG-2026-0417 --format json --out audit.json
 ```
 
-**方式 D：CI 流水线无人值守**
+**2. 带状态机（推荐给 AI / 长链路审计）**
+
+```bash
+usa ./src --approval-id CHG-2026-0417 --stage discovery
+usa ./src --approval-id CHG-2026-0417 --stage verify --verify-all
+usa ./src --approval-id CHG-2026-0417 --stage report --format sarif --out results.sarif
+```
+
+`--verify` 逐条核实（可重复），`--waive` 明确放弃；两者都没覆盖到的命中会让 `verify` 失败并列出来。
+
+**3. SCA 依赖扫描**
+
+```bash
+usa . --approval-id CHG-2026-0417 --sca
+```
+
+命中形如 `DEP_VULN  requests==2.19.0 GHSA-9hjg-9r4m-mvj7 fix>=2.20.0`。只读本地清单 + 只调 OSV 一个只读接口，不装包、不执行目标代码。
+
+**4. CI 无人值守**
+
 ```yaml
 env:
   AUTHORIZATION_MODE: CI_PIPELINE
   AUDIT_APPROVAL_ID: ${{ vars.AUDIT_APPROVAL_ID }}
   AUDIT_TARGETS: "src/;dist/app.asar"
-run: python scripts/run_audit.py --targets "$AUDIT_TARGETS"
+run: usa --format sarif --out results.sarif
 ```
 
-## 🧰 技术栈
+## 报告格式
 
-<p align="center">
-  <img src="https://img.shields.io/badge/-Python-3776AB?logo=python&logoColor=white&style=flat-square" />
-  <img src="https://img.shields.io/badge/-OpenAI%20API-412991?logo=openai&logoColor=white&style=flat-square" />
-  <img src="https://img.shields.io/badge/-Playwright-2EAD33?logo=playwright&logoColor=white&style=flat-square" />
-  <img src="https://img.shields.io/badge/-Docker-2496ED?logo=docker&logoColor=white&style=flat-square" />
-  <img src="https://img.shields.io/badge/-GitHub%20Actions-2088FF?logo=githubactions&logoColor=white&style=flat-square" />
-  <img src="https://img.shields.io/badge/-Ghidra-2C2D72?logo=gnu%20emacs&logoColor=white&style=flat-square" />
-  <img src="https://img.shields.io/badge/-jadx-FF6B00?style=flat-square" />
-  <img src="https://img.shields.io/badge/-OWASP%20LLM%20Top%2010%202025-8b5cf6?style=flat-square" />
-</p>
+| 格式 | 用途 | 命令 |
+|---|---|---|
+| text | 人在终端看 | 默认 |
+| json | 机器消费 / 存档 | `--format json --out audit.json` |
+| sarif | GitHub Code Scanning | `--format sarif --out results.sarif` |
 
-## 🔌 外部工具依赖（按需安装）
+SARIF 每条结果都带 `file` + `startLine` + `ruleId`。等级映射固定：硬编码凭据 / `eval` / 关闭证书校验 → `error`；其余 → `warning` 或 `note`。
 
-技能本身不强制装这些，但 AI 会在需要时引导调用：
+## 吃自己的狗粮
 
-- **Playwright MCP** — 前端抓包 / 动态分析
-- **webcrack** — JS 反混淆（`npm i -g webcrack`）
-- **jadx** — Android APK 反编译
-- **Ghidra** — 原生二进制逆向
+CI 不只跑 pytest——它让 USA 扫自己，并把 SARIF 传到 Security 面板：
 
-详见 [`references/toolchain.md`](references/toolchain.md)。
+```yaml
+- run: usa . --approval-id CI-SELF-AUDIT --format sarif --out results.sarif --allow-findings
+- uses: github/codeql-action/upload-sarif@v3
+  with: { sarif_file: results.sarif }
+```
 
-## ❓ 常见问题
+这份结果会出现在仓库的 Security 标签页里。**注意**：扫到 `examples/` 与 `tests/fixtures/` 的演示密钥是预期行为，所以自我审计用 `--allow-findings` 不让 CI 红。
 
-<details>
-<summary><b>Q：这和直接把代码丢给 ChatGPT 有什么区别？</b></summary>
-
-<br/>
-
-直接丢给 ChatGPT，它会跳过扫描和降维，根据表面特征直接给结论。这个技能强制 AI 先走三阶漏斗、先确认授权、每步写证据笔记——你能看到它"怎么想的"，而不只是"想出来什么"。
-</details>
-
-<details>
-<summary><b>Q：CI 模式怎么授权？我设了 AUTHORIZATION_MODE 为什么还被 BLOCKED？</b></summary>
-
-<br/>
-
-`AUTHORIZATION_MODE=CI_PIPELINE` 只说明运行形态，不是授权。必须同时注入 `AUDIT_APPROVAL_ID`（审批编号）和 `AUDIT_TARGETS`（允许审计的路径前缀），且待审计对象必须全部落在目标清单内。缺任一项即 BLOCKED；有审批但无 CI 上下文（非 GitHub/GitLab/Jenkins 环境）则降为 DEGRADED，只做静态侦察。
-</details>
-
-<details>
-<summary><b>Q：支持哪些大模型？</b></summary>
-
-<br/>
-
-任何兼容 OpenAI Chat Completions 接口的模型：GPT-4o、DeepSeek、通义千问、Kimi、豆包、本地 vLLM 部署等。通过 `OPENAI_BASE_URL` 环境变量切换端点。
-</details>
-
-<details>
-<summary><b>Q：能用来审计我客户的系统吗？</b></summary>
-
-<br/>
-
-可以，但**必须**先获得客户的书面授权。详见 [DISCLAIMER.md](DISCLAIMER.md) 和 [LICENSE](LICENSE) 中的安全工具附加条款。未经授权的测试属于违法行为。
-</details>
-
-## 📂 仓库结构
+## 目录结构
 
 ```text
 ultimate-security-audit/
-├── README.md
-├── LICENSE                  # MIT + 安全工具附加条款
-├── Dockerfile
-├── SKILL.md                 # 主控指令（V2.3.0，渐进披露）
-├── CAPABILITIES.md          # 一页速查：四个入口的能力边界
-├── audit_notes.md           # 仓库级变更记录
-├── Makefile                 # make check：文档 + 测试 + 门控
-├── pyproject.toml
-├── references/              # 按需加载的执行细则
-│   ├── audit-workflow.md
-│   ├── audit-report.md
-│   ├── authorization-and-handling.md
-│   ├── ci-pipeline-mode.md
-│   └── toolchain.md         # Playwright / webcrack / Ghidra / jadx
-├── assets/
-│   └── audit_notes.template.md
+├── SKILL.md                 # Agent 入口契约（门控 + 状态机铁律）
+├── CAPABILITIES.md          # 一页能力矩阵
+├── references/              # 渐进披露：按需加载的细则
+├── assets/                  # 证据笔记模板
 ├── scripts/
-│   ├── run_audit.py         # 门控入口（fail-closed）
-│   ├── project_probe.py     # 阶段一扫描引擎
-│   ├── skill_probe.py       # 外部能力探测
+│   ├── run_audit.py         # 统一网关 usa
+│   ├── project_probe.py     # 阶段一静态扫描（10 条规则）
+│   ├── dep_scanner.py       # SCA：OSV 依赖漏洞
+│   ├── state_manager.py     # 防幻觉状态机
+│   ├── report_formatter.py  # SARIF 输出
 │   └── check_docs.py        # 文档死链校验
-├── tests/
-│   ├── sandbox_test.py
-│   ├── test_golden.py
-│   ├── test_repo_integrity.py
-│   ├── test_skill_probe.py
-│   └── fixtures/            # sample/ 与 expected_report.json
-├── prompt/
-│   └── system_prompt.txt    # 网页端系统提示词（V2.0 对齐）
-├── api/
-│   └── openai_compatible.py # OpenAI 兼容 Python 客户端
-├── examples/
-│   ├── sample_code.js       # 演示样本
-│   ├── audit_notes.md       # 证据链笔记示例（已填好）
-│   └── audit_report.md      # 六段式审计报告示例
-└── .github/
-    ├── ISSUE_TEMPLATE/
-    └── workflows/ci.yml
+├── tests/                   # golden / 状态机 / SCA / 完整性
+└── .github/workflows/ci.yml # 测试 + 自我审计 + SARIF 上传
 ```
 
-## ⚠️ 免责声明
-
-> [!WARNING]
-> 本项目**仅用于**合法的企业级软件安全审计、自有资产测试、开源项目分析及已授权的安全研究。使用者需确保对审查目标拥有合法授权；**严禁**用于任何未授权的逆向、破解或攻击行为。详见 [DISCLAIMER.md](DISCLAIMER.md)。
-
-## 📚 更多文档
-
-[技能主控](SKILL.md) · [CI 模式契约](references/ci-pipeline-mode.md) · [授权边界](references/authorization-and-handling.md) · [报告规范](references/audit-report.md) · [能力速查](CAPABILITIES.md) · [工具链](references/toolchain.md) · [安全策略](SECURITY.md) · [贡献指南](CONTRIBUTING.md)
-
----
-
-<a id="-english"></a>
-
-## 🌐 English
-
-> [!NOTE]
-> This is not an automated scanner (not Semgrep/CodeQL) and not an exploit generator. It's an **industrial-grade process spec**: forces the LLM through three fixed stages, gates every engagement on explicit authorization, persists an evidence chain to local files, self-checks evidence before drawing conclusions, and supports unattended CI-pipeline runs bound to an approval ID + explicit target list. Output is an auditable six-section report.
-
-## What it does
-
-Instead of jumping straight to a conclusion, the skill forces the LLM through a **three-stage funnel** with a paper trail at each step:
-
-```
-  🔍 ① Static discovery
-     Scan entry points · Extract API paths · Flag suspicious patterns
-        │
-        ▼
-  🔬 ② Intermediate deobfuscation
-     Deobfuscate · Reverse · Intercept traffic · Restore key functions
-        │
-        ▼
-  🧠 ③ Deep deduction
-     Trace data flow · Build PoC · Produce standard report
-```
-
-## V2.0: Dual authorization
-
-| Mode | Trigger | Authorization basis | Behavior |
-| :--- | :--- | :--- | :--- |
-| **Interactive** (default) | Direct chat request | Session statement / approval ID / written consent | Gate then run the funnel |
-| **CI pipeline** | `AUTHORIZATION_MODE=CI_PIPELINE` | `AUDIT_APPROVAL_ID` + `AUDIT_TARGETS` + CI context | Three-state: **EXECUTE** / **BLOCKED** / **DEGRADED** |
-
->The mode switch alone is not authorization. The skill only honors two verifiable fields — approval ID and target list — and fails closed when either is missing.
-
-## Input / output contract
-
-**You give it:** a code snippet, a local path, a URL, or a binary sample.
-
-**It gives you a six-section report:** conclusion → Mermaid flow → evidence (`[STATIC]`/`[DYNAMIC]`/`[REVERSE]`/`[HTTP]`) → findings by severity → minimal non-destructive PoC → remediation with acceptance criteria.
-
-OWASP LLM Top 10 2025 mapping is **conditional**: only when the target is itself an LLM/Agent app (prompt, tool schema, vector store, openai/langchain/mcp dependency) does the findings table get a compliance column. Each tag must trace back to one piece of evidence; year-pinned numbers are required (2025 ≠ 2023). Non-LLM targets write `[compliance: N/A]`.
-
-## Core capabilities
-
-| Capability | Notes |
-| :--- | :--- |
-| 🪣 **Three-stage funnel** | Static → deobfuscation → deduction; no skipped stages |
-| 🚦 **Dual authorization** | Interactive + CI-pipeline approval-bound, fail-closed on missing fields |
-| 🔍 **Forced evidence self-check** | Reads `audit_notes.md` before concluding; marks missing evidence |
-| 📋 **Six-section report** | Conclusion / flow / evidence / findings / PoC / remediation |
-| 🛠 **Toolchain routing** | webcrack / Playwright MCP / Ghidra / jadx / leanrea by target type |
-| ⚖️ **Conditional compliance mapping** | OWASP LLM Top 10 2025 only for LLM/Agent targets |
-| 🌐 **Multi-platform** | Claude Code / Cursor / ChatGPT / Kimi / Doubao / OpenAI API |
-
-## Platform matrix
-
-| Platform | How to use | File |
-| :--- | :--- | :--- |
-| **Claude Code / Cursor** | Native skill load | [`SKILL.md`](SKILL.md) + [`references/`](references/) |
-| **ChatGPT / Kimi / Doubao web** | Paste as system prompt | `prompt/system_prompt.txt` |
-| **Python / automation** | Inject as system message | `api/openai_compatible.py` |
-
-## Quick start
+## 自检
 
 ```bash
-# Option A: native agent skill
-git clone https://github.com/Trace520/ultimate-security-audit.git ~/.claude/skills/ultimate-security-audit
-
-# Option B: Python
-pip install openai
-export OPENAI_API_KEY=sk-xxxx
-python api/openai_compatible.py
-
-# Option C: Docker (with Playwright)
-docker build -t ultimate-security-audit .
-docker run --rm -it ultimate-security-audit
-
-# Option D: CI (unattended)
-# AUTHORIZATION_MODE=CI_PIPELINE, AUDIT_APPROVAL_ID, AUDIT_TARGETS required
+make check     # 文档校验 + pytest + 门控冒烟 + SARIF 冒烟
 ```
 
-## Disclaimer
+## 边界
 
-> [!WARNING]
-> For legitimate auditing of your own assets, open-source code analysis, and authorized engagements only. You must have explicit written permission before testing any third-party system. See [DISCLAIMER.md](DISCLAIMER.md).
-
----
-
-<div align="center">
-
-**[📢 Release v2.0](https://github.com/Trace520/ultimate-security-audit/releases/tag/v2.0)** ·
-**[🐛 Report a bug](https://github.com/Trace520/ultimate-security-audit/issues/new?template=bug_report.md)** ·
-**[✨ Request a feature](https://github.com/Trace520/ultimate-security-audit/issues/new?template=feature_request.md)**
-
-<sub>Built with care · MIT licensed · Not affiliated with any listed tool vendor</sub>
-
-</div>
+只用于**自有资产或已获书面授权**的目标。不做未授权测试、不绕过许可与访问控制、不输出可批量利用的成品工具。细节见 [DISCLAIMER.md](DISCLAIMER.md) 与 [SECURITY.md](SECURITY.md)。
