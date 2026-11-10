@@ -1,5 +1,6 @@
 """SARIF 输出必须是合法的 2.1.0 文档，且每条命中都能定位到文件与行。"""
 import json
+from pathlib import Path
 
 import report_formatter
 
@@ -33,3 +34,23 @@ def test_empty_findings_is_valid():
     assert doc["runs"][0]["results"] == []
     serialized = json.dumps(doc, ensure_ascii=False)
     assert "results" in serialized
+
+
+def test_cli_json_out_writes_file(tmp_path):
+    """--format json --out 必须真的落盘，否则 README 的示例就是假的。"""
+    import subprocess
+    import sys
+
+    root = Path(__file__).resolve().parents[1]
+    out = tmp_path / "audit.json"
+    proc = subprocess.run(
+        [sys.executable, "-B", str(root / "scripts" / "run_audit.py"),
+         str(root / "tests" / "fixtures" / "sample"),
+         "--approval-id", "CHG-TEST-0001", "--format", "json",
+         "--out", str(out), "--allow-findings"],
+        capture_output=True, text=True,
+    )
+    assert out.exists(), proc.stderr
+    data = json.loads(out.read_text(encoding="utf-8"))
+    assert data["status"] == "DEGRADED"
+    assert len(data["findings"]) == 1
