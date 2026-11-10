@@ -2,68 +2,55 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, master]
   pull_request:
-    branches: [main]
 
 jobs:
-  compile:
+  check:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        python-version: ["3.10", "3.12"]
+        python: ["3.10", "3.12"]
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install dependencies
-        run: pip install openai
-
-      - name: Syntax check (py_compile)
-        run: python -m py_compile api/openai_compatible.py scripts/run_audit.py examples/verify_xor_key.py
+          python-version: ${{ matrix.python }}
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+          pip install pytest
+      - name: Check docs
+        run: python scripts/check_docs.py
+      - name: Run tests
+        run: python -B -m pytest tests/ -q
+      - name: Smoke run
+        run: python -B tests/sandbox_test.py
 
   audit-gate:
-    # 冒烟测门控：缺审批号必须 fail-closed，齐备时必须跑通。
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-
-      - name: Example PoC runs
-        run: python examples/verify_xor_key.py
-
-      - name: Gate fails closed without approval ID
+      - name: 缺审批号必须 BLOCKED（fail-closed）
+        shell: bash
         run: |
           set +e
-          AUTHORIZATION_MODE=CI_PIPELINE \
-            python scripts/run_audit.py \
-              --targets examples/sample_code.js \
-              --notes "$RUNNER_TEMP/notes-blocked.md"
+          AUTHORIZATION_MODE=CI_PIPELINE python -B scripts/run_audit.py \
+            --targets tests/fixtures/sample --json --notes "$RUNNER_TEMP/blocked.md"
           code=$?
           set -e
           echo "exit=$code"
           test "$code" -eq 2
-
-      - name: Gate executes with approval and matching commit
+      - name: 三项齐备时执行并打印证据笔记
+        shell: bash
         run: |
-          AUTHORIZATION_MODE=CI_PIPELINE \
-          AUDIT_APPROVAL_ID=CHG-2026-0417 \
-          GITHUB_SHA="$(git rev-parse HEAD)" \
-            python scripts/run_audit.py \
-              --targets examples/sample_code.js \
-              --notes "$RUNNER_TEMP/notes-exec.md"
-
-      - name: Show generated notes
-        run: head -n 30 "$RUNNER_TEMP/notes-exec.md"
+          AUTHORIZATION_MODE=CI_PIPELINE AUDIT_APPROVAL_ID=CHG-CI-0001 \
+            python -B scripts/run_audit.py --targets tests/fixtures/sample \
+            --notes "$RUNNER_TEMP/exec.md"
+          cat "$RUNNER_TEMP/exec.md"
