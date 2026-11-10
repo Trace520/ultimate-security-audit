@@ -17,3 +17,9 @@
 - 修复：`SKILL.md` 的 `name` 对齐仓库名 `ultimate-security-audit`（此前叫 `enterprise-security-audit`，按名字加载会找不到目录）。
 - 新增：`usa` 控制台入口（`pip install -e .` 后可用）与 `python -m scripts`，支持 `usa <target> --approval-id <ID>`；门控不变。
 - 修复：`scripts/run_audit.py` 保留授权门控（缺审批号 `exit 2`），`scripts/project_probe.py` 只做扫描，不再自称「审计完成」。
+- 3.0：新增防幻觉状态机 `scripts/state_manager.py`（`discovery → verify → report`，漏项 / 跳步 / 换审批号均 BLOCKED）。
+- 3.0：新增 SCA `scripts/dep_scanner.py`（锁版本 → OSV `querybatch`；离线降级，不编造命中）。
+- 3.0：新增 `scripts/report_formatter.py`，`--format sarif` 输出 SARIF 2.1.0，可上传 Code Scanning。
+- 3.0：`usa` 增加 `--format/--out/--stage/--verify/--waive/--state/--sca`，版本号统一为 3.0.0。
+- 3.0：CI 增加自我审计并上传 SARIF；`make check` 增加 SARIF 冒烟。
+- 2.x 遗留说明：`README` 与 `SKILL.md` 的版本徽章此前指向 v2.x，本版一并对齐。
