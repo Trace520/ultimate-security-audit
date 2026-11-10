@@ -1,0 +1,81 @@
+name: ci-diag3
+
+# 一次性诊断 v3：逐条复刻 ci.yml check job 的命令，记录每步退出码，日志回写仓库。
+on:
+  push:
+    branches: [main]
+    paths: [".github/workflows/ci-diag3.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 逐条执行
+        shell: bash
+        run: |
+          LOG=ci-diag3.log
+          : > $LOG
+          echo "## python" >> $LOG
+          python --version >> $LOG 2>&1
+          pip --version >> $LOG 2>&1
+
+          echo "## install" >> $LOG
+          python -m pip install --upgrade pip >> $LOG 2>&1
+          echo "pip_upgrade=$?" >> $LOG
+          pip install -e . >> $LOG 2>&1
+          echo "install=$?" >> $LOG
+          pip install pytest >> $LOG 2>&1
+          echo "pytest_install=$?" >> $LOG
+
+          echo "## check docs" >> $LOG
+          python scripts/check_docs.py >> $LOG 2>&1
+          echo "docs=$?" >> $LOG
+
+          echo "## tests" >> $LOG
+          python -B -m pytest tests/ -q >> $LOG 2>&1
+          echo "tests=$?" >> $LOG
+
+          echo "## smoke" >> $LOG
+          python -B tests/sandbox_test.py >> $LOG 2>&1
+          echo "smoke=$?" >> $LOG
+
+          echo "## cli" >> $LOG
+          usa --help >> $LOG 2>&1
+          echo "usa_help=$?" >> $LOG
+          python -m scripts --help >> $LOG 2>&1
+          echo "module_help=$?" >> $LOG
+          python -B -m scripts tests/fixtures/sample >> $LOG 2>&1
+          echo "cli_exit=$?" >> $LOG
+
+          echo "## sarif" >> $LOG
+          python -B scripts/run_audit.py tests/fixtures/sample --approval-id CHG-SMOKE --format sarif --out results.sarif --allow-findings >> $LOG 2>&1
+          echo "sarif_write=$?" >> $LOG
+          python -B -c "import json;d=json.load(open('results.sarif'));assert d['version']=='2.1.0';assert d['runs'][0]['tool']['driver']['version']=='3.0.0'" >> $LOG 2>&1
+          echo "sarif_parse=$?" >> $LOG
+
+          echo "## state" >> $LOG
+          rm -f .audit-state.json
+          python -B scripts/run_audit.py tests/fixtures/sample --approval-id CHG-SMOKE --stage discovery --allow-findings >> $LOG 2>&1
+          echo "discovery=$?" >> $LOG
+          python -B scripts/run_audit.py tests/fixtures/sample --approval-id CHG-SMOKE --stage report >> $LOG 2>&1
+          echo "report=$?" >> $LOG
+
+          tail -c 600 $LOG
+
+      - name: 回写日志
+        shell: bash
+        run: |
+          git config user.name "ci-diag"
+          git config user.email "ci-diag@users.noreply.github.com"
+          git add -f ci-diag3.log
+          git commit -m "diag3: CI 每步退出码" || echo "nothing"
+          git push "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" HEAD:main
