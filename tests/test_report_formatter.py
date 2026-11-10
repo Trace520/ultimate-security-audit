@@ -1,8 +1,24 @@
 """SARIF 输出必须是合法的 2.1.0 文档，且每条命中都能定位到文件与行。"""
 import json
+import os
 from pathlib import Path
 
 import report_formatter
+
+
+# 判读 CI 上下文的环境变量：这些一旦存在，run_audit 会把状态从 DEGRADED 升为 EXECUTE。
+# 测试必须把它们清掉，否则会“本地绿、CI 红”。
+CI_ENV_KEYS = {
+    "CI", "GITHUB_ACTIONS", "GITHUB_SHA", "GITHUB_RUN_ID",
+    "GITLAB_CI", "CI_COMMIT_SHA", "CI_PIPELINE_ID",
+    "JENKINS_URL", "JENKINS_HOME", "GIT_COMMIT", "BUILD_ID",
+    "AUTHORIZATION_MODE", "AUDIT_APPROVAL_ID", "AUDIT_TARGETS",
+    "AUDIT_COMMIT_SHA", "AUDIT_RUN_ID",
+}
+
+
+def _clean_env() -> dict:
+    return {k: v for k, v in os.environ.items() if k not in CI_ENV_KEYS}
 
 
 def test_sarif_shape_and_locations():
@@ -13,20 +29,26 @@ def test_sarif_shape_and_locations():
     doc = report_formatter.to_sarif(findings, version="3.0.0")
     assert doc["version"] == "2.1.0"
     assert doc["$schema"].endswith("sarif-2.1.0.json")
-
     run = doc["runs"][0]
     assert run["tool"]["driver"]["name"] == "ultimate-security-audit"
     assert run["tool"]["driver"]["version"] == "3.0.0"
+    assert run["results"][0]["locations"][0]["physicalLocation"]["artifactLocation"]["uri"] == "src/a.js"
+    assert run["results"][0]["locations"][0]["physicalLocation"]["region"]["startLine"] == 5
+    assert run["results"][0]["level"] == "error"
+    assert run["results"][1]["level"] == "warning"
+    # 规则索引必须能对上 tool.driver.rules
+    for r in run["results"]:
+        idx = r["ruleIndex"]
+        assert run["tool"]["driver"]["rules"][idx]["id"]
 
-    rule_ids = {r["id"] for r in run["tool"]["driver"]["rules"]}
-    assert rule_ids == {"HARDCODED_SECRET", "DEP_VULN"}
 
-    assert len(run["results"]) == 2
-    first = run["results"][0]
-    assert first["ruleId"] == "HARDCODED_SECRET"
-    assert first["level"] == "error"
-    assert first["locations"][0]["physicalLocation"]["region"]["startLine"] == 5
-    assert first["locations"][0]["physicalLocation"]["artifactLocation"]["uri"] == "src/a.js"
+def test_level_mapping():
+    mapping = report_formatter.level_for
+    assert mapping("HARDCODED_SECRET") == "error"
+    assert mapping("EVAL_USAGE") == "error"
+    assert mapping("TLS_VERIFY_OFF") == "error"
+    assert mapping("PLAINTEXT_HTTP") == "note"
+    assert mapping("DEP_VULN") == "warning"
 
 
 def test_empty_findings_is_valid():
@@ -48,7 +70,7 @@ def test_cli_json_out_writes_file(tmp_path):
          str(root / "tests" / "fixtures" / "sample"),
          "--approval-id", "CHG-TEST-0001", "--format", "json",
          "--out", str(out), "--allow-findings"],
-        capture_output=True, text=True,
+        capture_output=True, text=True, env=_clean_env(),
     )
     assert out.exists(), proc.stderr
     data = json.loads(out.read_text(encoding="utf-8"))
