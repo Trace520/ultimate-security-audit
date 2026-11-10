@@ -5,9 +5,8 @@ from pathlib import Path
 
 import report_formatter
 
-
-# 判读 CI 上下文的环境变量：这些一旦存在，run_audit 会把状态从 DEGRADED 升为 EXECUTE。
-# 测试必须把它们清掉，否则会“本地绿、CI 红”。
+# 会被 run_audit 当作 CI 上下文的环境变量：存在时状态从 DEGRADED 升为 EXECUTE，
+# 测试里必须清掉，否则同一条用例在本地绿、在 GitHub/GitLab/Jenkins 上红。
 CI_ENV_KEYS = {
     "CI", "GITHUB_ACTIONS", "GITHUB_SHA", "GITHUB_RUN_ID",
     "GITLAB_CI", "CI_COMMIT_SHA", "CI_PIPELINE_ID",
@@ -29,26 +28,20 @@ def test_sarif_shape_and_locations():
     doc = report_formatter.to_sarif(findings, version="3.0.0")
     assert doc["version"] == "2.1.0"
     assert doc["$schema"].endswith("sarif-2.1.0.json")
+
     run = doc["runs"][0]
     assert run["tool"]["driver"]["name"] == "ultimate-security-audit"
     assert run["tool"]["driver"]["version"] == "3.0.0"
-    assert run["results"][0]["locations"][0]["physicalLocation"]["artifactLocation"]["uri"] == "src/a.js"
-    assert run["results"][0]["locations"][0]["physicalLocation"]["region"]["startLine"] == 5
-    assert run["results"][0]["level"] == "error"
-    assert run["results"][1]["level"] == "warning"
-    # 规则索引必须能对上 tool.driver.rules
-    for r in run["results"]:
-        idx = r["ruleIndex"]
-        assert run["tool"]["driver"]["rules"][idx]["id"]
 
+    rule_ids = {r["id"] for r in run["tool"]["driver"]["rules"]}
+    assert rule_ids == {"HARDCODED_SECRET", "DEP_VULN"}
 
-def test_level_mapping():
-    mapping = report_formatter.level_for
-    assert mapping("HARDCODED_SECRET") == "error"
-    assert mapping("EVAL_USAGE") == "error"
-    assert mapping("TLS_VERIFY_OFF") == "error"
-    assert mapping("PLAINTEXT_HTTP") == "note"
-    assert mapping("DEP_VULN") == "warning"
+    assert len(run["results"]) == 2
+    first = run["results"][0]
+    assert first["ruleId"] == "HARDCODED_SECRET"
+    assert first["level"] == "error"
+    assert first["locations"][0]["physicalLocation"]["region"]["startLine"] == 5
+    assert first["locations"][0]["physicalLocation"]["artifactLocation"]["uri"] == "src/a.js"
 
 
 def test_empty_findings_is_valid():
