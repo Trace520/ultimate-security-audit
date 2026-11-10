@@ -1,0 +1,202 @@
+## python
+Python 3.12.16
+pip 26.2.2 from /opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/site-packages/pip (python 3.12)
+## install
+Requirement already satisfied: pip in /opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/site-packages (26.2.2)
+Collecting pip
+  Downloading pip-26.3-py3-none-any.whl.metadata (4.6 kB)
+Downloading pip-26.3-py3-none-any.whl (2.0 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.0/2.0 MB 52.7 MB/s  0:00:00
+Installing collected packages: pip
+  Attempting uninstall: pip
+    Found existing installation: pip 26.2.2
+    Uninstalling pip-26.2.2:
+      Successfully uninstalled pip-26.2.2
+Successfully installed pip-26.3
+pip_upgrade=0
+Obtaining file:///home/runner/work/ultimate-security-audit/ultimate-security-audit
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Checking if build backend supports build_editable: started
+  Checking if build backend supports build_editable: finished with status 'done'
+  Getting requirements to build editable: started
+  Getting requirements to build editable: finished with status 'done'
+  Preparing editable metadata (pyproject.toml): started
+  Preparing editable metadata (pyproject.toml): finished with status 'done'
+Building wheels for collected packages: ultimate-security-audit
+  Building editable for ultimate-security-audit (pyproject.toml): started
+  Building editable for ultimate-security-audit (pyproject.toml): finished with status 'done'
+  /tmp/pip-build-env-vmg4ehug/overlay/lib/python3.12/site-packages/setuptools/command/editable_wheel.py:354: BuildBackendWarning: Editable installation.
+  !!
+  
+          ********************************************************************************
+          Please be careful with folders in your working directory with the same
+          name as your package as they may take precedence during imports.
+          ********************************************************************************
+  
+  !!
+    with strategy, WheelFile(wheel_path, "w") as wheel_obj:
+  Created wheel for ultimate-security-audit: filename=ultimate_security_audit-3.0.0-0.editable-py3-none-any.whl size=4681 sha256=eb24752701d3e21b9298b387a7c293f7280e3d5501317398081cfe8403787cca
+  Stored in directory: /tmp/pip-ephem-wheel-cache-4dxwix22/wheels/12/33/e9/a52171b63aa5618175aabff72dd1f2bc43e0b3cc701c2ec10b
+Successfully built ultimate-security-audit
+Installing collected packages: ultimate-security-audit
+Successfully installed ultimate-security-audit-3.0.0
+install=0
+Collecting pytest
+  Downloading pytest-9.2.0-py3-none-any.whl.metadata (7.9 kB)
+Collecting iniconfig>=2 (from pytest)
+  Downloading iniconfig-2.3.1-py3-none-any.whl.metadata (2.8 kB)
+Collecting packaging>=24 (from pytest)
+  Downloading packaging-26.3-py3-none-any.whl.metadata (3.5 kB)
+Collecting pluggy<2,>=1.6 (from pytest)
+  Downloading pluggy-1.7.0-py3-none-any.whl.metadata (5.0 kB)
+Collecting pygments>=2.15 (from pytest)
+  Downloading pygments-2.21.0-py3-none-any.whl.metadata (2.5 kB)
+Downloading pytest-9.2.0-py3-none-any.whl (411 kB)
+Downloading pluggy-1.7.0-py3-none-any.whl (27 kB)
+Downloading iniconfig-2.3.1-py3-none-any.whl (7.6 kB)
+Downloading packaging-26.3-py3-none-any.whl (129 kB)
+Downloading pygments-2.21.0-py3-none-any.whl (1.3 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.3/1.3 MB 64.5 MB/s  0:00:00
+Installing collected packages: pygments, pluggy, packaging, iniconfig, pytest
+
+Successfully installed iniconfig-2.3.1 packaging-26.3 pluggy-1.7.0 pygments-2.21.0 pytest-9.2.0
+pytest_install=0
+## check docs
+[check_docs] OK
+docs=0
+## tests
+.......FF........                                                        [100%]
+=================================== FAILURES ===================================
+________________________ test_sarif_shape_and_locations ________________________
+
+    def test_sarif_shape_and_locations():
+        findings = [
+            {"file": "src/a.js", "line": 5, "rule": "HARDCODED_SECRET", "match": "secret_key_123"},
+            {"file": "requirements.txt", "line": 1, "rule": "DEP_VULN", "match": "urllib3==1.26.0 CVE-2021-1"},
+        ]
+        doc = report_formatter.to_sarif(findings, version="3.0.0")
+        assert doc["version"] == "2.1.0"
+        assert doc["$schema"].endswith("sarif-2.1.0.json")
+        run = doc["runs"][0]
+        assert run["tool"]["driver"]["name"] == "ultimate-security-audit"
+        assert run["tool"]["driver"]["version"] == "3.0.0"
+        assert run["results"][0]["locations"][0]["physicalLocation"]["artifactLocation"]["uri"] == "src/a.js"
+        assert run["results"][0]["locations"][0]["physicalLocation"]["region"]["startLine"] == 5
+        assert run["results"][0]["level"] == "error"
+        assert run["results"][1]["level"] == "warning"
+        # 规则索引必须能对上 tool.driver.rules
+        for r in run["results"]:
+>           idx = r["ruleIndex"]
+                  ^^^^^^^^^^^^^^
+E           KeyError: 'ruleIndex'
+
+tests/test_report_formatter.py:41: KeyError
+______________________________ test_level_mapping ______________________________
+
+    def test_level_mapping():
+>       mapping = report_formatter.level_for
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'report_formatter' has no attribute 'level_for'
+
+tests/test_report_formatter.py:46: AttributeError
+=========================== short test summary info ============================
+FAILED tests/test_report_formatter.py::test_sarif_shape_and_locations - KeyError: 'ruleIndex'
+FAILED tests/test_report_formatter.py::test_level_mapping - AttributeError: module 'report_formatter' has no attribute 'level_for'
+2 failed, 15 passed in 0.18s
+tests=1
+## smoke
+sandbox_test: OK
+smoke=0
+## cli
+usage: usa [-h] [--targets TARGETS] [--approval-id APPROVAL_ID]
+           [--repo-root REPO_ROOT] [--notes NOTES] [--json] [--allow-findings]
+           [--strict] [--format {text,json,sarif}] [--out OUT]
+           [--stage {discovery,verify,report}] [--verify VERIFY]
+           [--verify-all] [--waive WAIVE] [--state STATE] [--sca]
+           [target ...]
+
+Ultimate Security Audit — 门控 + 阶段一
+
+positional arguments:
+  target                目标（可多个），等价于 --targets
+
+options:
+  -h, --help            show this help message and exit
+  --targets TARGETS     目标清单，分号 / 逗号 / 换行分隔；缺省读 AUDIT_TARGETS
+  --approval-id APPROVAL_ID
+                        审批编号，等价于 AUDIT_APPROVAL_ID；交互式命令行使用
+  --repo-root REPO_ROOT
+                        目标必须落在该目录内
+  --notes NOTES         证据笔记输出路径，默认 audit_notes.local.md
+  --json                stdout 只输出单行 JSON
+  --allow-findings      有命中仍返回 0（供冒烟测试）
+  --strict              外部能力缺失时直接 BLOCKED（退出码 2）
+  --format {text,json,sarif}
+                        输出格式，默认 text；--format sarif 供 Code Scanning
+  --out OUT             SARIF / JSON 输出文件路径
+  --stage {discovery,verify,report}
+                        推进防幻觉状态机：discovery → verify → report
+  --verify VERIFY       verify 阶段核实的 finding id（可重复）
+  --verify-all          verify 阶段一次性声明全部已核实（需人工确认后再用）
+  --waive WAIVE         明确放弃的 finding id（与 --verify 二选一）
+  --state STATE         状态文件，默认 .audit-state.json
+  --sca                 额外跑依赖漏洞扫描（OSV，需要网络；失败降级不编造）
+usa_help=0
+usage: __main__.py [-h] [--targets TARGETS] [--approval-id APPROVAL_ID]
+                   [--repo-root REPO_ROOT] [--notes NOTES] [--json]
+                   [--allow-findings] [--strict] [--format {text,json,sarif}]
+                   [--out OUT] [--stage {discovery,verify,report}]
+                   [--verify VERIFY] [--verify-all] [--waive WAIVE]
+                   [--state STATE] [--sca]
+                   [target ...]
+
+Ultimate Security Audit — 门控 + 阶段一
+
+positional arguments:
+  target                目标（可多个），等价于 --targets
+
+options:
+  -h, --help            show this help message and exit
+  --targets TARGETS     目标清单，分号 / 逗号 / 换行分隔；缺省读 AUDIT_TARGETS
+  --approval-id APPROVAL_ID
+                        审批编号，等价于 AUDIT_APPROVAL_ID；交互式命令行使用
+  --repo-root REPO_ROOT
+                        目标必须落在该目录内
+  --notes NOTES         证据笔记输出路径，默认 audit_notes.local.md
+  --json                stdout 只输出单行 JSON
+  --allow-findings      有命中仍返回 0（供冒烟测试）
+  --strict              外部能力缺失时直接 BLOCKED（退出码 2）
+  --format {text,json,sarif}
+                        输出格式，默认 text；--format sarif 供 Code Scanning
+  --out OUT             SARIF / JSON 输出文件路径
+  --stage {discovery,verify,report}
+                        推进防幻觉状态机：discovery → verify → report
+  --verify VERIFY       verify 阶段核实的 finding id（可重复）
+  --verify-all          verify 阶段一次性声明全部已核实（需人工确认后再用）
+  --waive WAIVE         明确放弃的 finding id（与 --verify 二选一）
+  --state STATE         状态文件，默认 .audit-state.json
+  --sca                 额外跑依赖漏洞扫描（OSV，需要网络；失败降级不编造）
+module_help=0
+[AUDIT_MODE: BLOCKED | missing: AUTHORIZATION_MODE=CI_PIPELINE 或 --approval-id + 目标; AUDIT_APPROVAL_ID]
+补齐方式：在流水线里注入上述字段（不要写成字面量），字段说明见 references/ci-pipeline-mode.md。
+cli_exit=2
+## sarif
+[AUDIT_MODE: EXECUTE | approval: CHG-SMOKE | targets: 1 | ci: github | run: 42786301636]
+[*] SARIF：results.sarif（1 条结果）
+sarif_write=0
+sarif_parse=0
+## state
+[STATE] stage: discovery | approval: CHG-SMOKE | discovery: 1 | verified: 0 | waived: 0
+[AUDIT_MODE: EXECUTE | approval: CHG-SMOKE | targets: 1 | ci: github | run: 42786301636]
+  sample_code.js:5 [HARDCODED_SECRET] secret_key_123
+[*] 扫描目标 1 个，可疑模式命中 1 条
+[*] 证据笔记：audit_notes.local.md
+[*] 分级：error 1 / warning 0 / note 0
+[*] 状态机：stage: discovery | approval: CHG-SMOKE | discovery: 1 | verified: 0 | waived: 0
+discovery=0
+[AUDIT_MODE: BLOCKED | missing: 跳步：当前阶段 discovery，需先完成 verify 才能进入 report]
+[AUDIT_MODE: EXECUTE | approval: CHG-SMOKE | targets: 1 | ci: github | run: 42786301636]
+  sample_code.js:5 [HARDCODED_SECRET] secret_key_123
+[*] 扫描目标 1 个，可疑模式命中 1 条
+report=2
