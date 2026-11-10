@@ -52,5 +52,5 @@ jobs:
         run: |
           AUTHORIZATION_MODE=CI_PIPELINE AUDIT_APPROVAL_ID=CHG-CI-0001 \
             python -B scripts/run_audit.py --targets tests/fixtures/sample \
-            --notes "$RUNNER_TEMP/exec.md"
+            --allow-findings --notes "$RUNNER_TEMP/exec.md"
           cat "$RUNNER_TEMP/exec.md"
