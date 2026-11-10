@@ -1,0 +1,1 @@
+{"status": "EXECUTE", "targets": 1, "findings": [{"file": "sample_code.js", "line": 5, "rule": "HARDCODED_SECRET", "match": "secret_key_123"}], "warnings": []}
