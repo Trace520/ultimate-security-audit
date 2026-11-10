@@ -27,4 +27,43 @@ jobs:
         run: pip install openai
 
       - name: Syntax check (py_compile)
-        run: python -m py_compile api/openai_compatible.py
+        run: python -m py_compile api/openai_compatible.py scripts/run_audit.py examples/verify_xor_key.py
+
+  audit-gate:
+    # 冒烟测门控：缺审批号必须 fail-closed，齐备时必须跑通。
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Example PoC runs
+        run: python examples/verify_xor_key.py
+
+      - name: Gate fails closed without approval ID
+        run: |
+          set +e
+          AUTHORIZATION_MODE=CI_PIPELINE \
+            python scripts/run_audit.py \
+              --targets examples/sample_code.js \
+              --notes "$RUNNER_TEMP/notes-blocked.md"
+          code=$?
+          set -e
+          echo "exit=$code"
+          test "$code" -eq 2
+
+      - name: Gate executes with approval and matching commit
+        run: |
+          AUTHORIZATION_MODE=CI_PIPELINE \
+          AUDIT_APPROVAL_ID=CHG-2026-0417 \
+          GITHUB_SHA="$(git rev-parse HEAD)" \
+            python scripts/run_audit.py \
+              --targets examples/sample_code.js \
+              --notes "$RUNNER_TEMP/notes-exec.md"
+
+      - name: Show generated notes
+        run: head -n 30 "$RUNNER_TEMP/notes-exec.md"
