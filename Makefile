@@ -1,6 +1,6 @@
-.PHONY: check docs test gate regen-fixture clean
+.PHONY: check docs test gate sarif regen-fixture clean
 
-check: docs test gate
+check: docs test gate sarif
 
 docs:
 	python3 scripts/check_docs.py
@@ -15,9 +15,14 @@ gate:
 	set -e; \
 	test $$code -eq 2 && echo "[gate] 缺审批号 -> BLOCKED(exit 2) OK"
 
+sarif:
+	@python3 -B scripts/run_audit.py tests/fixtures/sample --approval-id CHG-SMOKE \
+	  --format sarif --out results.sarif --allow-findings >/dev/null
+	@python3 -c "import json;d=json.load(open('results.sarif'));assert d['version']=='2.1.0';assert d['runs'][0]['tool']['driver']['version']=='3.0.0';print('[sarif] 2.1.0 OK')"
+
 regen-fixture:
 	python3 scripts/run_audit.py --targets tests/fixtures/sample --json --allow-findings \
 	  --notes /tmp/_regen.md > tests/fixtures/expected_report.json
 
 clean:
-	rm -rf .pytest_cache build dist *.egg-info
+	rm -rf .pytest_cache build dist *.egg-info results.sarif audit.json

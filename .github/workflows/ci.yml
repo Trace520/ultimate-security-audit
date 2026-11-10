@@ -1,4 +1,4 @@
-name: CI
+name: CI & Self-Audit
 
 on:
   push:
@@ -30,6 +30,7 @@ jobs:
       - name: Smoke run
         run: python -B tests/sandbox_test.py
       - name: CLI 入口（usa / python -m scripts）
+        shell: bash
         run: |
           usa --help > /dev/null
           python -m scripts --help > /dev/null
@@ -38,6 +39,25 @@ jobs:
           code=$?
           set -e
           echo "cli exit=$code"
+          test "$code" -eq 2
+      - name: SARIF 输出可解析
+        shell: bash
+        run: |
+          python -B scripts/run_audit.py tests/fixtures/sample --approval-id CHG-SMOKE \
+            --format sarif --out results.sarif --allow-findings
+          python -B -c "import json;d=json.load(open('results.sarif'));assert d['version']=='2.1.0';assert d['runs'][0]['tool']['driver']['version']=='3.0.0';print('sarif ok')"
+      - name: 状态机必须拦住跳步
+        shell: bash
+        run: |
+          rm -f .audit-state.json
+          python -B scripts/run_audit.py tests/fixtures/sample --approval-id CHG-SMOKE \
+            --stage discovery --allow-findings > /dev/null
+          set +e
+          python -B scripts/run_audit.py tests/fixtures/sample --approval-id CHG-SMOKE \
+            --stage report > /dev/null 2>&1
+          code=$?
+          set -e
+          echo "state-machine exit=$code"
           test "$code" -eq 2
 
   audit-gate:
@@ -64,3 +84,29 @@ jobs:
             python -B scripts/run_audit.py --targets tests/fixtures/sample \
             --allow-findings --notes "$RUNNER_TEMP/exec.md"
           cat "$RUNNER_TEMP/exec.md"
+
+  self-audit:
+    name: 自我审计（SARIF → Security 面板）
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: pip install -e .
+      - name: 用本工具审计本仓库
+        # 仓库里 examples/ 与 fixtures 自带演示密钥，扫到就是预期结果
+        continue-on-error: true
+        run: |
+          usa . --approval-id CI-SELF-AUDIT --format sarif \
+            --out results.sarif --allow-findings
+          python -B -c "import json;d=json.load(open('results.sarif'));print('results:',len(d['runs'][0]['results']))"
+      - name: Upload SARIF to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results.sarif
+          category: self-audit

@@ -9,3 +9,8 @@ venv/
 
 # 运行时证据笔记（仓库级变更记录是 audit_notes.md，别混）
 audit_notes.local.md
+
+# 运行产物与状态文件（可重生成，不入库）
+results.sarif
+audit.json
+.audit-state.json

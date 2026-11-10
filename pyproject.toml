@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ultimate-security-audit"
-version = "2.3.0"
-description = "Ultimate Security Audit — 授权门控 + 阶段一静态侦察"
+version = "3.0.0"
+description = "Ultimate Security Audit — 授权门控 + 防幻觉状态机 + SCA + SARIF"
 requires-python = ">=3.10"
 dependencies = []
 
