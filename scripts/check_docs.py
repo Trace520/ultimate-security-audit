@@ -29,6 +29,9 @@ SKIP_PARTS = {".git", "node_modules", ".pytest_cache", "build", "dist",
 SKIP_EXACT = {
     "audit_notes.md", "audit_notes.local.md", "notes-exec.md",
     "references/decision-matrix.md",
+    # 运行产物 / 被测对象的依赖清单：真实存在但不在本仓库
+    "results.sarif", "audit.json", ".audit-state.json",
+    "requirements.txt", "requirements-dev.txt", "package-lock.json", "package.json",
 }
 BAD_CHARS = set(' ;<>{}()|*$\\"\'')
 COMMANDS = ("pip", "pip3", "python", "python3", "git", "make", "npm", "npx",
