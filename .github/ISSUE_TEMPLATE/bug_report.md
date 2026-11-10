@@ -12,7 +12,8 @@ A clear description of what went wrong.
 - OS: [e.g. Windows 11 / macOS 14 / Ubuntu 22.04]
 - Client: [e.g. Claude Code / Cursor / ChatGPT web / Kimi / Doubao / custom OpenAI client]
 - Model: [e.g. claude-3.5-sonnet / gpt-4o / deepseek-chat]
-- Skill version / commit: [e.g. v1.0.0 or commit hash]
+- Skill version / commit: [e.g. v3.0.0 or commit hash]
+- Command used: [e.g. `usa ./src --approval-id CHG-xxx --format json`]
 
 **Steps to reproduce**
 1. ...
@@ -26,4 +27,5 @@ What you expected to happen.
 What actually happened.
 
 **Screenshots / logs**
-Paste relevant logs or attach screenshots here.
+Paste relevant logs or attach screenshots here. If possible, also attach the
+**desensitized** output of `usa . --format json`（删掉真实域名 / IP / 凭据 / 内部路径后再贴）。

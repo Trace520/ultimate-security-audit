@@ -1,6 +1,6 @@
 # audit_notes 示例（针对 sample_code.js 的一次走完）
 
-> 这是一份填好的示例，展示 `audit_notes.md` 应该长什么样。模板见 [../skill/assets/audit_notes.template.md](../skill/assets/audit_notes.template.md)。
+> 这是一份填好的示例，展示 `audit_notes.md` 应该长什么样。模板见 [../assets/audit_notes.template.md](../assets/audit_notes.template.md)。
 
 ## 授权声明
 

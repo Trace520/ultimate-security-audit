@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """探测外部 MCP 技能与本地等价能力是否可用。
 
-输出一行 JSON，供 SKILL.md 3.1 / 3.2 的降级矩阵使用：
+输出一行 JSON，供 SKILL.md 第 3 节与 references/fallback-matrix.md 的降级矩阵使用：
 缺失项不必中断，按 references/audit-workflow.md 的本地等价命令继续。
 """
 from __future__ import annotations

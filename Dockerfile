@@ -1,20 +1,13 @@
-# Playwright Python image bundles browser binaries (Chromium, Firefox, WebKit)
-# so the audit skill can drive headless browsers out of the box.
+# 基于 Playwright 官方镜像：需要动态阶段时可直接驱动无头浏览器
 FROM mcr.microsoft.com/playwright/python:v1.40.0-jammy
 
 WORKDIR /app
 
-# Copy skill content
-COPY skill/ ./skill/
-COPY prompt/ ./prompt/
-COPY api/ ./api/
-COPY docs/ ./docs/
-COPY examples/ ./examples/
-COPY README.md LICENSE ./
+# 整仓库复制：扁平化后不再有 skill/ 与 docs/ 子目录
+COPY . .
 
-# Install the OpenAI SDK
-RUN pip install --no-cache-dir openai
+# 以可编辑模式安装，暴露 usa 命令（门控逻辑与本地一致）
+RUN pip install --no-cache-dir -e .
 
-# Default: run the audit CLI against stdin.
-# Override with your own command when using as a base image.
-CMD ["python", "api/openai_compatible.py"]
+# 默认只打印用法；真正审计需显式传 --approval-id 与目标
+CMD ["usa", "--help"]
