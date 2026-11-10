@@ -293,7 +293,14 @@ def main() -> int:
         report_formatter.write(out, doc)
         print(f"[*] SARIF：{out}（{len(findings)} 条结果）")
     elif fmt == "json":
-        print(json.dumps(report, ensure_ascii=False))
+        payload = json.dumps(report, ensure_ascii=False)
+        if a.out:
+            out = Path(a.out)
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text(payload, encoding="utf-8")
+            print(f"[*] JSON：{out}（{len(findings)} 条结果）")
+        else:
+            print(payload)
     elif status != "BLOCKED":
         summary = report_formatter.summarize(findings)
         print(f"[*] 证据笔记：{notes}")
