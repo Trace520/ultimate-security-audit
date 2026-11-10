@@ -9,7 +9,8 @@
 - **BLOCKED**：缺字段 / 占位值 / 目标越界或不存在 / 读不到本地 HEAD。
   **退出码 2，且不打开任何目标文件。**
 
-交互模式（SKILL.md 0.1）不通过环境变量确认，本脚本只接受 CI 流水线形态。
+两种用法：CI 流水线（环境变量注入），或交互式命令行 ``usa <target> --approval-id <ID>``；
+后者没有 CI 上下文，必然降为 DEGRADED，只做阶段一。
 """
 from __future__ import annotations
 
@@ -127,10 +128,15 @@ def write_notes(path: Path, *, approval: str, targets: list[str], ci: str,
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="Ultimate Security Audit — 门控 + 阶段一")
+    ap.add_argument("target", nargs="*",
+                    help="目标（可多个），等价于 --targets")
     ap.add_argument("--targets", default=None,
                     help="目标清单，分号 / 逗号 / 换行分隔；缺省读 AUDIT_TARGETS")
+    ap.add_argument("--approval-id", default=None,
+                    help="审批编号，等价于 AUDIT_APPROVAL_ID；交互式命令行使用")
     ap.add_argument("--repo-root", default=None, help="目标必须落在该目录内")
-    ap.add_argument("--notes", default=None, help="证据笔记输出路径")
+    ap.add_argument("--notes", default=None,
+                    help="证据笔记输出路径，默认 audit_notes.local.md")
     ap.add_argument("--json", action="store_true", help="stdout 只输出单行 JSON")
     ap.add_argument("--allow-findings", action="store_true",
                     help="有命中仍返回 0（供冒烟测试）")
@@ -139,16 +145,22 @@ def main() -> int:
     a = ap.parse_args()
 
     root = Path(a.repo_root).resolve() if a.repo_root else ROOT
-    approval = _env("AUDIT_APPROVAL_ID")
-    raw_targets = a.targets if a.targets is not None else _env("AUDIT_TARGETS")
+    approval = (a.approval_id or "").strip() or _env("AUDIT_APPROVAL_ID")
+    interactive = bool(a.approval_id) and bool(a.target or a.targets)
+    if a.targets is not None:
+        raw_targets = a.targets
+    elif a.target:
+        raw_targets = ";".join(a.target)
+    else:
+        raw_targets = _env("AUDIT_TARGETS")
     specs = split_targets(raw_targets)
     ci, ci_sha = detect_ci()
     run_id = (_env("GITHUB_RUN_ID") or _env("CI_PIPELINE_ID")
               or _env("BUILD_ID") or "")
 
     blocked: list[str] = []
-    if _env("AUTHORIZATION_MODE").upper() != "CI_PIPELINE":
-        blocked.append("AUTHORIZATION_MODE=CI_PIPELINE")
+    if _env("AUTHORIZATION_MODE").upper() != "CI_PIPELINE" and not interactive:
+        blocked.append("AUTHORIZATION_MODE=CI_PIPELINE 或 --approval-id + 目标")
     if not approval or approval.lower() in PLACEHOLDER_APPROVAL:
         blocked.append("AUDIT_APPROVAL_ID")
     if not specs:
@@ -205,7 +217,7 @@ def main() -> int:
                     print(f"  {f['file']}:{f['line']} [{f['rule']}] {f['match']}")
                 print(f"[*] 扫描目标 {len(targets)} 个，可疑模式命中 {len(findings)} 条")
 
-    notes = Path(a.notes) if a.notes else Path("audit_notes.md")
+    notes = Path(a.notes) if a.notes else Path("audit_notes.local.md")
     write_notes(notes, approval=approval, targets=specs, ci=ci, run_id=run_id,
                 status=status, findings=findings, reason=reason)
 
@@ -229,4 +241,7 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except BrokenPipeError:  # 被 head / more 截断时不打一堆红字
+        sys.exit(0)

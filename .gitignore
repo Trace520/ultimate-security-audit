@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+
+# 运行时证据笔记（仓库级变更记录是 audit_notes.md，别混）
+audit_notes.local.md
