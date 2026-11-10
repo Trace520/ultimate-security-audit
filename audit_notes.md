@@ -12,4 +12,6 @@
 - 修复：文档路径由 `scripts/check_docs.py` 校验。
 - 修复：外部技能降级由 `scripts/skill_probe.py` 探测，`SKILL.md` 3.1 提供降级矩阵。
 - 重构：把 skill 与 docs 两个目录扁平化到根目录，SKILL.md、CAPABILITIES.md、references、assets 各就各位。
+- 修复：`SKILL.md` 的 `name` 对齐仓库名 `ultimate-security-audit`（此前叫 `enterprise-security-audit`，按名字加载会找不到目录）。
+- 新增：`usa` 控制台入口（`pip install -e .` 后可用）与 `python -m scripts`，支持 `usa <target> --approval-id <ID>`；门控不变。
 - 修复：`scripts/run_audit.py` 保留授权门控（缺审批号 `exit 2`），`scripts/project_probe.py` 只做扫描，不再自称「审计完成」。

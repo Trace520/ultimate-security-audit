@@ -18,6 +18,7 @@ DECLARED = [
     "references/toolchain.md",
     "assets/audit_notes.template.md",
     "scripts/__init__.py",
+    "scripts/__main__.py",
     "scripts/run_audit.py",
     "scripts/project_probe.py",
     "scripts/skill_probe.py",

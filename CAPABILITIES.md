@@ -6,7 +6,7 @@
 
 | 入口 | 回答什么问题 | 怎么用 |
 |---|---|---|
-| `scripts/run_audit.py` | 这次运行有没有授权依据，扫到了什么 | `python scripts/run_audit.py --targets tests/fixtures/sample` |
+| `usa`（= `scripts/run_audit.py`） | 这次运行有没有授权依据，扫到了什么 | `pip install -e .` 后 `usa tests/fixtures/sample --approval-id CHG-001`；等价 `python scripts/run_audit.py --targets ...`、`python -m scripts ...` |
 | `scripts/project_probe.py` | 单个目录 / 文件里有哪些可疑模式 | `python scripts/project_probe.py <target>` |
 | `scripts/skill_probe.py` | 外部引擎装没装，要不要降级 | `python scripts/skill_probe.py` |
 | `scripts/check_docs.py` | 文档里写的路径是不是真的存在 | `python scripts/check_docs.py` |
@@ -19,7 +19,17 @@
 | `DEGRADED` | 三项齐备但无 CI 上下文，或 commit 漂移 | 只做阶段一，笔记里写原因 |
 | `BLOCKED` | 缺字段 / 占位值 / 目标越界或不存在 / 读不到 HEAD | 退出码 `2`，**不打开任何目标文件** |
 
-`AUTHORIZATION_MODE` 单独存在不算授权：它证明的是运行形态，不是目标归属。
+`AUTHORIZATION_MODE` 单独存在不算授权：它证明的是运行形态，不是目标归属。交互式命令行必须同时给 `--approval-id` 与目标，否则直接 `BLOCKED`。
+
+## 2.1 三个入口，同一套门控
+
+```bash
+usa tests/fixtures/sample --approval-id CHG-001      # 装成命令后
+python -m scripts tests/fixtures/sample --approval-id CHG-001
+python scripts/run_audit.py --targets tests/fixtures/sample --approval-id CHG-001
+```
+
+命中即返回 `1`（`--allow-findings` 可压回 `0`），`BLOCKED` 恒为 `2`。
 
 ## 3. 阶段一能答什么
 

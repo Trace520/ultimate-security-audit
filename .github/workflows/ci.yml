@@ -29,6 +29,16 @@ jobs:
         run: python -B -m pytest tests/ -q
       - name: Smoke run
         run: python -B tests/sandbox_test.py
+      - name: CLI 入口（usa / python -m scripts）
+        run: |
+          usa --help > /dev/null
+          python -m scripts --help > /dev/null
+          set +e
+          python -B -m scripts tests/fixtures/sample > /dev/null 2>&1
+          code=$?
+          set -e
+          echo "cli exit=$code"
+          test "$code" -eq 2
 
   audit-gate:
     runs-on: ubuntu-latest

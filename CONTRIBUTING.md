@@ -19,6 +19,10 @@
    ```bash
    make check
    ```
+   装了命令行的顺带确认入口没断：
+   ```bash
+   pip install -e . && usa --help > /dev/null && python -m scripts --help > /dev/null
+   ```
    它包含三步：文档死链校验、pytest、门控冒烟（缺审批号必须 `exit 2`）。
 6. **改到 fixture** 时同步重新生成期望报告，否则 `tests/test_golden.py` 会红：
    ```bash

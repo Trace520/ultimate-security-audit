@@ -12,6 +12,9 @@ dependencies = []
 [project.optional-dependencies]
 dev = ["pytest>=7"]
 
+[project.scripts]
+usa = "scripts.run_audit:main"
+
 [tool.setuptools]
 packages = ["scripts"]
 
