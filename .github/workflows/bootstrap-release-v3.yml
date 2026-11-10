@@ -1,0 +1,45 @@
+name: bootstrap-release-v3
+
+# 一次性工作流：用 runner 自带的 GITHUB_TOKEN 建 v3.0.0 tag + Release。
+# 只在自身被改动时触发，跑完把自己删掉。
+on:
+  push:
+    branches: [main]
+    paths: [".github/workflows/bootstrap-release-v3.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create v3.0.0 release (idempotent)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          if gh release view v3.0.0 >/dev/null 2>&1; then
+            echo "release v3.0.0 已存在，跳过"
+            exit 0
+          fi
+          gh release create v3.0.0 \
+            --target "$GITHUB_SHA" \
+            --title "v3.0.0 — 防幻觉状态机 / SCA / SARIF" \
+            --notes-file RELEASE_NOTES_v3.0.0.md
+          echo "created: $(gh release view v3.0.0 --json url --jq .url)"
+
+      - name: Remove bootstrap workflow
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          SHA=$(gh api "repos/$GITHUB_REPOSITORY/contents/.github/workflows/bootstrap-release-v3.yml?ref=$GITHUB_SHA" --jq .sha)
+          gh api -X DELETE "repos/$GITHUB_REPOSITORY/contents/.github/workflows/bootstrap-release-v3.yml" \
+            -f message="chore: 移除一次性 release workflow" -f sha="$SHA" \
+            && echo "workflow removed" || echo "remove failed"
