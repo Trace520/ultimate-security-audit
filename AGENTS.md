@@ -28,8 +28,13 @@ When operating in or on this repository:
 | `SKILL.md` | Native skill definition (Claude Code / Cursor / similar) |
 | `prompt/system_prompt.txt` | Plain-text system prompt for web chat UIs |
 | `api/openai_compatible.py` | Minimal OpenAI-compatible client wrapper |
-| `scripts/run_audit.py` | CI gate + stage-one static recon CLI (stdlib only, offline, read-only) |
+| `scripts/run_audit.py` | 统一网关 `usa`：fail-closed 门控 + 阶段一扫描 + `--format text/json/sarif`（stdlib only, offline, read-only） |
+| `scripts/state_manager.py` | 防幻觉状态机（discovery → verify → report），跳步 / 漏项 / 换审批号即 BLOCKED |
+| `scripts/dep_scanner.py` | SCA：读锁定版本的依赖清单 → OSV `querybatch`，离线降级不编造 |
+| `scripts/report_formatter.py` | SARIF 2.1.0 输出，供 Code Scanning 消费 |
 | `examples/` | Self-contained demo fixtures and sample audit output |
+| `references/state-machine.md` | 状态机契约与状态文件结构 |
+| `references/fallback-matrix.md` | 外部依赖缺失时的本地等价做法 |
 | `references/toolchain.md` | Optional underlying tooling (Playwright, webcrack, Ghidra) |
 | `CAPABILITIES.md` | One-page map of what each entry point can and cannot answer |
 
