@@ -22,4 +22,5 @@ license: MIT
 ## 📦 核心工具与报告
 - **扫描依赖/密钥**：`usa <target> --stage discovery --format json`
 - **生成 SARIF 报告**：`usa <target> --format sarif --out results.sarif`
+- **AI 复核（可选）**：`usa <target> --approval-id <ID> --use-ai`（需 `OPENROUTER_API_KEY`，失败降级、命中保留）
 - **环境降级探测**：运行 `python scripts/skill_probe.py`，若缺失外部能力，参考 `references/fallback-matrix.md` 执行本地命令。

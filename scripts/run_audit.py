@@ -163,6 +163,8 @@ def main() -> int:
                     help="状态文件，默认 .audit-state.json")
     ap.add_argument("--sca", action="store_true",
                     help="额外跑依赖漏洞扫描（OSV，需要网络；失败降级不编造）")
+    ap.add_argument("--use-ai", action="store_true",
+                    help="对本地命中做 AI 复核（需 OPENROUTER_API_KEY；失败降级、命中保留）")
     a = ap.parse_args()
     fmt = "json" if a.json else (a.format or "text")
 
@@ -250,6 +252,14 @@ def main() -> int:
             warnings.append(dep_err)
             if status == "EXECUTE":
                 status, reason = "DEGRADED", dep_err
+
+    # AI 研判：可选的第二层，只复核、不改判定；拿不到就降级，命中一律保留
+    if status != "BLOCKED" and a.use_ai and findings:
+        import llm_analyzer  # noqa: PLC0415
+
+        findings, ai_notes = llm_analyzer.refine(
+            findings, progress=lambda m: print(f"[ai] {m}", file=sys.stderr))
+        warnings.extend(ai_notes)
 
     # 状态机：显式给 --stage 才强制，单次扫描保持向后兼容
     state_path = Path(a.state) if a.state else Path(state_manager.DEFAULT_STATE)
