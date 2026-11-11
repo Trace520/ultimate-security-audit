@@ -83,11 +83,15 @@ def endpoint() -> str:
 
 
 def available() -> tuple[bool, str]:
-    """返回 (能否研判, 不能则给原因)。"""
-    if requests is None:
-        return False, "requests 未安装（pip install '.[ai]'）"
+    """返回 (能否研判, 不能则给原因)。
+
+    先看 key 再看依赖：CI 里只装 ``pip install -e .``（不装 requests），
+    没有 key 的场景必须稳定地报「未配置 KEY」，否则判定会随环境漂移。
+    """
     if not api_key():
         return False, "未配置 OPENROUTER_API_KEY"
+    if requests is None:
+        return False, "requests 未安装（pip install '.[ai]'）"
     return True, ""
 
 

@@ -8,6 +8,19 @@ def _finding(**kw):
     return base
 
 
+class _StubRequests:
+    """只让 available() 通过；真实请求一律走被 patch 的 _post，绝不联网。"""
+
+    @staticmethod
+    def post(*a, **k):  # pragma: no cover - 不该被调用
+        raise AssertionError("测试里不应发起真实 HTTP 请求")
+
+
+def _enable(monkeypatch, key="sk-or-test"):
+    monkeypatch.setenv("OPENROUTER_API_KEY", key)
+    monkeypatch.setattr(llm_analyzer, "requests", _StubRequests)
+
+
 def _fake_response(content, model="anthropic/claude-sonnet"):
     return {"model": model, "choices": [{"message": {"content": content}}]}
 
@@ -20,7 +33,7 @@ def test_available_without_key(monkeypatch):
 
 
 def test_available_without_requests(monkeypatch):
-    monkeypatch.setenv("OPENROUTER_API_KEY", "sk-or-test")
+    _enable(monkeypatch)
     monkeypatch.setattr(llm_analyzer, "requests", None)
     ok, why = llm_analyzer.available()
     assert ok is False
@@ -28,7 +41,7 @@ def test_available_without_requests(monkeypatch):
 
 
 def test_analyze_strips_code_fence(monkeypatch):
-    monkeypatch.setenv("OPENROUTER_API_KEY", "sk-or-test")
+    _enable(monkeypatch)
 
     def fake_post(url, headers, payload, timeout):
         return _fake_response(
@@ -44,7 +57,7 @@ def test_analyze_strips_code_fence(monkeypatch):
 
 
 def test_prompt_isolates_untrusted_code(monkeypatch):
-    monkeypatch.setenv("OPENROUTER_API_KEY", "sk-or-test")
+    _enable(monkeypatch)
     seen = {}
 
     def fake_post(url, headers, payload, timeout):
@@ -61,7 +74,7 @@ def test_prompt_isolates_untrusted_code(monkeypatch):
 
 
 def test_normalize_rejects_garbage(monkeypatch):
-    monkeypatch.setenv("OPENROUTER_API_KEY", "sk-or-test")
+    _enable(monkeypatch)
     monkeypatch.setattr(
         llm_analyzer, "_post",
         lambda *a, **k: _fake_response('{"verdict": "maybe"}'))
@@ -74,7 +87,7 @@ def test_normalize_rejects_garbage(monkeypatch):
 
 
 def test_network_failure_is_degraded_not_fatal(monkeypatch):
-    monkeypatch.setenv("OPENROUTER_API_KEY", "sk-or-test")
+    _enable(monkeypatch)
 
     def boom(*a, **k):
         raise llm_analyzer.AnalyzerError("请求异常: ConnectionError: offline")
@@ -88,7 +101,7 @@ def test_network_failure_is_degraded_not_fatal(monkeypatch):
 
 
 def test_refine_filters_false_positive_and_keeps_sca(monkeypatch):
-    monkeypatch.setenv("OPENROUTER_API_KEY", "sk-or-test")
+    _enable(monkeypatch)
 
     def fake_post(url, headers, payload, timeout):
         snippet = payload["messages"][1]["content"]
@@ -109,7 +122,7 @@ def test_refine_filters_false_positive_and_keeps_sca(monkeypatch):
 
 
 def test_refine_budget_marks_untouched(monkeypatch):
-    monkeypatch.setenv("OPENROUTER_API_KEY", "sk-or-test")
+    _enable(monkeypatch)
     monkeypatch.setattr(llm_analyzer, "_post",
                         lambda *a, **k: _fake_response('{"is_real_vulnerability": true, "reason": "ok"}'))
     findings = [_finding(line=i, rule="EVAL_USAGE", match=f"eval(x{i})") for i in range(1, 5)]
