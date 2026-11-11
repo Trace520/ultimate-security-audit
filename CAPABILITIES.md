@@ -11,6 +11,7 @@
 | `scripts/dep_scanner.py` | 依赖清单里有没有已知漏洞 | `usa <target> --sca` |
 | `scripts/state_manager.py` | 这轮审计走到哪一步、还差什么 | `usa <target> --stage verify` |
 | `scripts/report_formatter.py` | 结果怎么变成 SARIF | `usa <target> --format sarif` |
+| `scripts/llm_analyzer.py` | 这条命中是不是真问题（可选，需联网） | `usa <target> --approval-id <ID> --use-ai` |
 | `scripts/skill_probe.py` | 外部引擎装没装，要不要降级 | `python scripts/skill_probe.py` |
 | `scripts/check_docs.py` | 文档里写的路径是不是真的存在 | `python scripts/check_docs.py` |
 
@@ -37,11 +38,17 @@
 - SCA：只查锁定版本（`requirements.txt` 的 `==`、`package-lock.json` 的 `version`），走 OSV `querybatch`。
 - 每条命中带 `文件:行`、规则 ID、片段；输出确定性，`tests/test_golden.py` 守着。
 
+## 4.5 AI 研判（可选第二层）
+
+`--use-ai` 把本地命中逐条送模型复核，只判「真 / 假」，不加新命中。没配
+`OPENROUTER_API_KEY`、没装 `requests`、网络失败、返回不合法 —— 一律保留原命中并记
+`ai_verdict=UNRESOLVED`，绝不静默丢结果。阈值与降级矩阵见 `references/ai-layer.md`。
+
 ## 5. 故意不答
 
 - 不下漏洞定性。命中只是「可疑模式」，可达性与影响面要走阶段二 / 三。
 - 不抓包、不反混淆、不反编译、不构造 PoC。
-- 不执行目标代码、不装依赖、不改目标文件；唯一联网动作是 OSV 查询（由 `--sca` 控制）。
+- 不执行目标代码、不装依赖、不改目标文件；联网动作只有两处：OSV 查询（`--sca`）与 AI 研判（`--use-ai`），都要显式开启。
 - 依赖清单里是范围版本（`^1.2.3`）时不去猜，直接跳过并说明。
 - 目标清单里有一项不存在就整体 `BLOCKED`，不「先跑一部分」。
 
@@ -58,17 +65,4 @@ SARIF 等级映射：硬编码凭据 / `eval` / 关证书校验 → `error`；�
 ## 7. 不该用的时候
 
 - 没有授权凭证、也不在自有资产范围 —— 门控会中断，不要用环境变量绕。
-- 想绕过许可证、DRM、付费墙、访问控制。
-- 想直接拿可批量利用的成品工具 —— 只给最小验证脚本。
-- 只想问一个概念 —— 直接答，不接管工程。
-
-## 8. 本仓库不含的东西
-
-`rea-leanrea-router`、`leanrea` CLI、`dev-god`、沙箱报告目录、打包产物都不在本仓库，照旧路径访问会 404。
-需要那类能力时走 `references/fallback-matrix.md` 的本地等价做法。
-
-## 9. 自检
-
-```bash
-make check     # 文档校验 + pytest + 门控冒烟 + SARIF 冒烟
-```
+- 命中片段属于不可外发内容时，不要开 `--use-ai`。

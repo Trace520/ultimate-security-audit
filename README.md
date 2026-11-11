@@ -68,9 +68,10 @@ exit=2
 | 📊 SARIF 2.1.0 | `--format sarif` 可直接上传 GitHub Code Scanning |
 | 🧾 证据落盘 | 授权段、命中表、未执行阶段写进 `audit_notes.local.md`（已 gitignore） |
 | 🪪 三入口等价 | `usa` / `python -m scripts` / `python scripts/run_audit.py` 共用同一套门控 |
+| 🤖 AI 复核（可选） | `--use-ai` 把本地命中逐条送模型判真假，**失败降级、命中保留**，不加新命中 |
 | 📄 确定性输出 | 同一目标同一 commit，扫描结果逐字节一致（`tests/test_golden.py` 守着） |
 
-## 三种典型用法
+## 典型用法
 
 **1. 本地快速扫描**
 
@@ -106,6 +107,18 @@ env:
 run: usa --format sarif --out results.sarif
 ```
 
+**5. 可选 AI 复核（过滤误报）**
+
+```bash
+pip install -e '.[ai]'
+export OPENROUTER_API_KEY="sk-or-v1-..."
+usa . --approval-id CHG-2026-0417 --use-ai --format json --out audit.json
+```
+
+只把「相对路径 + 行号 + 命中片段」送出去，命中里追加 `ai_verdict`（`CONFIRMED` / `DISMISSED` / `UNRESOLVED`）。
+没 key、没装 `requests`、网络失败、返回不合法 —— 一律保留原命中并记 `UNRESOLVED`，不会静默丢结果。
+阈值、降级矩阵与隐私说明见 `references/ai-layer.md`。
+
 ## 报告格式
 
 | 格式 | 用途 | 命令 |
@@ -134,16 +147,17 @@ CI 不只跑 pytest——它让 USA 扫自己，并把 SARIF 传到 Security 面
 ultimate-security-audit/
 ├── SKILL.md                 # Agent 入口契约（门控 + 状态机铁律）
 ├── CAPABILITIES.md          # 一页能力矩阵
-├── references/              # 渐进披露：按需加载的细则
+├── references/              # 渐进披露：按需加载的细则（含 ai-layer.md）
 ├── assets/                  # 证据笔记模板
 ├── scripts/
 │   ├── run_audit.py         # 统一网关 usa
 │   ├── project_probe.py     # 阶段一静态扫描（10 条规则）
 │   ├── dep_scanner.py       # SCA：OSV 依赖漏洞
+│   ├── llm_analyzer.py      # AI 复核层（可选，唯一会调外部模型的模块）
 │   ├── state_manager.py     # 防幻觉状态机
 │   ├── report_formatter.py  # SARIF 输出
 │   └── check_docs.py        # 文档死链校验
-├── tests/                   # golden / 状态机 / SCA / 完整性
+├── tests/                   # golden / 状态机 / SCA / AI 层 / 完整性
 └── .github/workflows/ci.yml # 测试 + 自我审计 + SARIF 上传
 ```
 
@@ -155,4 +169,4 @@ make check     # 文档校验 + pytest + 门控冒烟 + SARIF 冒烟
 
 ## 边界
 
-只用于**自有资产或已获书面授权**的目标。不做未授权测试、不绕过许可与访问控制、不输出可批量利用的成品工具。细节见 [DISCLAIMER.md](DISCLAIMER.md) 与 [SECURITY.md](SECURITY.md)。
+只用于**自有资产或已获书面授权**的目标。不做未授权测试、不绕过许可与访问控制、不输出可批量利用的成品工具。`--use-ai` 会把命中片段送到第三方接口，敏感仓库请先看降级矩阵与隐私说明。细节见 [DISCLAIMER.md](DISCLAIMER.md) 与 [SECURITY.md](SECURITY.md)。
