@@ -1,5 +1,7 @@
 # Capabilities
 
+**简体中文** · [English](CAPABILITIES.en.md)
+
 一页速查。每个入口只回答一件事，互不替代；判据细则在 `references/`，运行证据落在 `audit_notes.local.md`。
 
 ## 1. 入口

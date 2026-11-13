@@ -1,7 +1,7 @@
 ---
 name: ultimate-security-audit
 version: 3.0.0
-description: 针对代码库执行严格的安全审计，内置防幻觉状态机与供应链扫描。
+description: 针对代码库执行严格的安全审计（授权门控 + 防幻觉状态机 + SCA + SARIF）；strict, authorization-gated audit with an anti-hallucination state machine, SCA and SARIF output.
 compatibility: "Python 3.10+ required for scripts/. Falls back to local grep if external tools are missing."
 license: MIT
 ---
