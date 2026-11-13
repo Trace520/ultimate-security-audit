@@ -121,6 +121,16 @@ usa . --approval-id CHG-2026-0417 --use-ai --format json --out audit.json
 没 key、没装 `requests`、网络失败、返回不合法 —— 一律保留原命中并记 `UNRESOLVED`，不会静默丢结果。
 阈值、降级矩阵与隐私说明见 `references/ai-layer.md`。
 
+**6. 存量治理（噪声排除 + 基线）**
+
+```bash
+usa . --approval-id CHG-2026-0417 --exclude 'vendor/**' --exclude '*.min.js'
+usa . --approval-id CHG-2026-0417 --baseline baseline.json --write-baseline
+usa . --approval-id CHG-2026-0417 --baseline baseline.json
+```
+
+`--exclude` 按相对路径 glob 把文件整份跳过（第三方 bundle 不再刷屏）；`--baseline` 记下存量命中，之后只报新增，退出码也只看新增。回环与示例域名（`localhost`、`127.0.0.1`、`*.example.com`）的明文 HTTP 在阶段一直接丢弃，不算命中。
+
 ## 报告格式
 
 | 格式 | 用途 | 命令 |
@@ -129,7 +139,7 @@ usa . --approval-id CHG-2026-0417 --use-ai --format json --out audit.json
 | json | 机器消费 / 存档 | `--format json --out audit.json` |
 | sarif | GitHub Code Scanning | `--format sarif --out results.sarif` |
 
-SARIF 每条结果都带 `file` + `startLine` + `ruleId`。等级映射固定：硬编码凭据 / `eval` / 关闭证书校验 → `error`；其余 → `warning` 或 `note`。
+SARIF 每条结果都带 `file` + `startLine` + `ruleId` + `partialFingerprints`（Code Scanning 靠它跨 run 去重）。等级映射固定：硬编码凭据 / `eval` / 关闭证书校验 → `error`；其余 → `warning` 或 `note`。
 
 ## 吃自己的狗粮
 

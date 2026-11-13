@@ -39,6 +39,7 @@
 - 10 条规则的可疑模式：硬编码凭据、`eval`、`Function` 构造器、进程调用、关闭证书校验、HTML 注入 sink、SQL 拼接、明文 HTTP、调试开关、混淆变量名赋字符串。
 - SCA：只查锁定版本（`requirements.txt` 的 `==`、`package-lock.json` 的 `version`），走 OSV `querybatch`。
 - 每条命中带 `文件:行`、规则 ID、片段；输出确定性，`tests/test_golden.py` 守着。
+- 降噪：回环 / 示例域名的 `http://` 不报；`--exclude` 整份跳过第三方 bundle；`--baseline` 只报新增。
 
 ## 4.5 AI 研判（可选第二层）
 
