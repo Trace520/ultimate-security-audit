@@ -42,6 +42,9 @@ def test_sarif_shape_and_locations():
     assert first["level"] == "error"
     assert first["locations"][0]["physicalLocation"]["region"]["startLine"] == 5
     assert first["locations"][0]["physicalLocation"]["artifactLocation"]["uri"] == "src/a.js"
+    # GitHub Code Scanning 跨 run 去重依赖这一项
+    assert first["partialFingerprints"] == {
+        "findingId/v1": "src/a.js:5:HARDCODED_SECRET"}
 
 
 def test_empty_findings_is_valid():

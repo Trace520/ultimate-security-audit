@@ -43,6 +43,8 @@ DECLARED = [
     "tests/test_report_formatter.py",
     "tests/test_dep_scanner.py",
     "tests/test_llm_analyzer.py",
+    "tests/test_noise_control.py",
+    "tests/test_project_probe.py",
     "examples/sample_code.js",
     "examples/audit_report.md",
     "examples/verify_xor_key.py",
