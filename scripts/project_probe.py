@@ -69,16 +69,17 @@ _NOISE_HOSTS = {"localhost", "127.0.0.1", "0.0.0.0", "::1",
                 "example.com", "example.org", "example.net", "example.local"}
 _NOISE_SUFFIXES = (".example.com", ".example.org", ".example.net",
                    ".example.local", ".test", ".invalid", ".localhost")
+_HOST_CHARS = re.compile(r"^[a-z0-9.\-:\[\]]+$")
 
 
 def _is_noise_http(snippet: str) -> bool:
-    """判断命中里的主机名是否属于「回环 / 示例」噪声。"""
+    """判断命中里的主机名是否属于「回环 / 示例 / 不是地址」噪声。"""
     try:
         host = (urlsplit(snippet.strip()).hostname or "").lower()
     except ValueError:
-        return False
-    if not host:
-        return False
+        return True
+    if not host or not _HOST_CHARS.match(host):
+        return True  # 没有合法主机名（如文档里只写 `http://`），不是地址
     return host in _NOISE_HOSTS or host.endswith(_NOISE_SUFFIXES)
 
 
@@ -136,7 +137,7 @@ def scan(target: Path, *, exclude: tuple[str, ...] = ()) -> list[dict]:
                     continue
                 snippet = m.group(0)
                 if rule_id == "PLAINTEXT_HTTP" and _is_noise_http(snippet):
-                    continue  # 回环 / 示例域名：降噪，不算命中
+                    continue  # 回环 / 示例域名 / 非地址片段：降噪，不算命中
                 if len(snippet) > 60:
                     snippet = snippet[:57] + "..."
                 findings.append({

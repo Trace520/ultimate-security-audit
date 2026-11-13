@@ -33,6 +33,12 @@ def test_plain_http_noise_hosts_are_skipped(tmp_path):
     assert findings[0]["match"].startswith("http://10.0.0.5")
 
 
+def test_scheme_only_mention_is_not_a_finding(tmp_path):
+    """文档里写「见 `http://` 说明」不算明文地址，否则自审计全是文档噪声。"""
+    _write(tmp_path, "doc.md", "明文 `http://` 一律不报。\n")
+    assert project_probe.scan(tmp_path) == []
+
+
 def test_https_is_not_plaintext(tmp_path):
     _write(tmp_path, "ok.js", 'const u = "https://api.corp.example.org/x"\n')
     assert project_probe.scan(tmp_path) == []
