@@ -8,7 +8,7 @@
 
 [![CI](https://github.com/Trace520/ultimate-security-audit/actions/workflows/ci.yml/badge.svg)](https://github.com/Trace520/ultimate-security-audit/actions/workflows/ci.yml)
 [![SARIF 2.1.0](https://img.shields.io/badge/report-SARIF%202.1.0-blue?style=flat-square)](references/audit-report.md)
-[![Python](https://img.shields.io/badge/python-3.10%20%7C%203.12-3766AB?logo=python&style=flat-square)](pyproject.toml)
+[![Python](https://img.shields.io/badge/python-3.10%20%7C%203.12-3776AB?logo=python&style=flat-square)](pyproject.toml)
 [![License](https://img.shields.io/badge/license-MIT%20%2B%20Security%20Terms-green?style=flat-square)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](CONTRIBUTING.md)
 
