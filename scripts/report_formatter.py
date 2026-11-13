@@ -63,6 +63,7 @@ def to_sarif(findings: list[dict], *, version: str, warnings: list[str] | None =
     results = []
     for f in findings:
         rule_id = f.get("rule", "UNKNOWN")
+        finding_id = f"{f.get('file', '?')}:{f.get('line', 0)}:{rule_id}"
         results.append({
             "ruleId": rule_id,
             "level": LEVELS.get(rule_id, "warning"),
@@ -73,9 +74,10 @@ def to_sarif(findings: list[dict], *, version: str, warnings: list[str] | None =
                     "region": {"startLine": max(1, int(f.get("line", 1)))},
                 }
             }],
-            "properties": {
-                "findingId": f"{f.get('file', '?')}:{f.get('line', 0)}:{rule_id}",
-            },
+            # GitHub Code Scanning 靠 partialFingerprints 跨 run 去重：没有它，
+            # 每次上传都会被当成「一批新告警」，历史告警的跟踪状态全部失效。
+            "partialFingerprints": {"findingId/v1": finding_id},
+            "properties": {"findingId": finding_id},
         })
 
     run = {

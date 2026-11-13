@@ -163,6 +163,12 @@ def main() -> int:
                     help="状态文件，默认 .audit-state.json")
     ap.add_argument("--sca", action="store_true",
                     help="额外跑依赖漏洞扫描（OSV，需要网络；失败降级不编造）")
+    ap.add_argument("--exclude", action="append", default=None, metavar="GLOB",
+                    help="跳过相对路径匹配该 glob 的文件（可重复），用于排除第三方 bundle")
+    ap.add_argument("--baseline", default=None, metavar="PATH",
+                    help="基线文件：本次只报基线里没有的命中，用于存量治理")
+    ap.add_argument("--write-baseline", action="store_true",
+                    help="把本次全部命中写入 --baseline（首次接管存量时用）")
     ap.add_argument("--use-ai", action="store_true",
                     help="对本地命中做 AI 复核（需 OPENROUTER_API_KEY；失败降级、命中保留）")
     a = ap.parse_args()
@@ -226,10 +232,11 @@ def main() -> int:
                 status, reason = "DEGRADED", (
                     f"commit 漂移: CI 声明 {ci_sha[:12]}, 本地 HEAD {head[:12]}")
 
+            excludes = tuple(a.exclude or ())
             import project_probe  # noqa: PLC0415
 
             for t in targets:
-                findings.extend(project_probe.scan(t))
+                findings.extend(project_probe.scan(t, exclude=excludes))
 
             header = (f"[AUDIT_MODE: {status} | approval: {approval} | "
                       f"targets: {len(targets)} | ci: {ci} | run: {run_id or '-'}]")
@@ -252,6 +259,35 @@ def main() -> int:
             warnings.append(dep_err)
             if status == "EXECUTE":
                 status, reason = "DEGRADED", dep_err
+
+    # 基线：存量治理。首次用 --write-baseline 落盘，之后只报新增命中
+    baseline_note = ""
+    if status != "BLOCKED" and a.baseline:
+        base_path = Path(a.baseline)
+        ids = [state_manager.finding_id(f) for f in findings]
+        if a.write_baseline:
+            base_path.parent.mkdir(parents=True, exist_ok=True)
+            base_path.write_text(json.dumps(
+                {"version": 1, "findings": sorted(set(ids))},
+                ensure_ascii=False, indent=2), encoding="utf-8")
+            baseline_note = f"基线已写入 {base_path}（{len(set(ids))} 条）"
+            warnings.append(baseline_note)
+        elif base_path.exists():
+            try:
+                known = set(json.loads(base_path.read_text(encoding="utf-8"))
+                            .get("findings") or [])
+            except (OSError, json.JSONDecodeError):
+                warnings.append(f"基线文件无法解析：{base_path}（本次按全量报告）")
+                known = set()
+            before = len(findings)
+            findings = [f for f in findings
+                        if state_manager.finding_id(f) not in known]
+            if before != len(findings):
+                baseline_note = (f"基线抑制 {before - len(findings)} 条存量命中，"
+                                 f"只报新增 {len(findings)} 条")
+                warnings.append(baseline_note)
+        else:
+            warnings.append(f"基线文件不存在：{base_path}（本次按全量报告）")
 
     # AI 研判：可选的第二层，只复核、不改判定；拿不到就降级，命中一律保留
     if status != "BLOCKED" and a.use_ai and findings:
@@ -314,6 +350,8 @@ def main() -> int:
     elif status != "BLOCKED":
         summary = report_formatter.summarize(findings)
         print(f"[*] 证据笔记：{notes}")
+        if baseline_note:
+            print(f"[*] 基线：{baseline_note}")
         print(f"[*] 分级：error {summary['error']} / warning {summary['warning']}"
               f" / note {summary['note']}")
         if state_info:

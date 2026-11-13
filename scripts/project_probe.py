@@ -12,7 +12,9 @@ import argparse
 import json
 import re
 import sys
+from fnmatch import fnmatchcase
 from pathlib import Path
+from urllib.parse import urlsplit
 
 BINARY_SUFFIX = {
     ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".ico", ".pdf", ".zip", ".gz",
@@ -27,7 +29,7 @@ SKIP_DIRS = {
 # (rule_id, 正则, 说明)
 RULES = [
     ("HARDCODED_SECRET",
-     re.compile(r"\bsecret_key_[A-Za-z0-9]+\b"),
+     re.compile(r"\bsecret_key_\w*[A-Za-z0-9]\b"),
      "硬编码密钥字面量"),
     ("HARDCODED_KEY_VAR",
      re.compile(r"(?i)\b(api_key|apikey|access_key|secret|token|password|passwd)\b"
@@ -60,6 +62,26 @@ RULES = [
 ]
 
 
+# 明文 HTTP 的噪声源：回环地址与示例域名。它们几乎必然出现在测试、
+# 文档与脚手架里，报出来只会把真实命中淹没（一个 Juice Shop 量级的前端
+# 光 localhost 就能刷出几百条），因此在阶段一直接丢弃。
+_NOISE_HOSTS = {"localhost", "127.0.0.1", "0.0.0.0", "::1",
+                "example.com", "example.org", "example.net", "example.local"}
+_NOISE_SUFFIXES = (".example.com", ".example.org", ".example.net",
+                   ".example.local", ".test", ".invalid", ".localhost")
+
+
+def _is_noise_http(snippet: str) -> bool:
+    """判断命中里的主机名是否属于「回环 / 示例」噪声。"""
+    try:
+        host = (urlsplit(snippet.strip()).hostname or "").lower()
+    except ValueError:
+        return False
+    if not host:
+        return False
+    return host in _NOISE_HOSTS or host.endswith(_NOISE_SUFFIXES)
+
+
 def _rel(path: Path, base: Path) -> str:
     try:
         return path.relative_to(base).as_posix()
@@ -67,26 +89,42 @@ def _rel(path: Path, base: Path) -> str:
         return path.name
 
 
-def _iter_files(target: Path) -> list[Path]:
+def _iter_files(target: Path, exclude: tuple[str, ...] = ()) -> list[Path]:
+    """枚举待扫文件；``exclude`` 是相对路径 glob（用 fnmatch 语义）。
+
+    第三方 bundle（如打包后的 three.js）一条文件就能刷出上千条明文 HTTP 命中，
+    必须能在网关层整体排除，否则报告等于不可读。
+    """
     if target.is_file():
-        return [target]
+        rel, name = _rel(target, target.parent), target.name
+        return [] if _excluded(rel, name, exclude) else [target]
     out: list[Path] = []
     for p in sorted(target.rglob("*")):
         if not p.is_file():
             continue
         if p.suffix.lower() in BINARY_SUFFIX:
             continue
-        if any(part in SKIP_DIRS for part in p.relative_to(target).parts):
+        rel = p.relative_to(target)
+        if any(part in SKIP_DIRS for part in rel.parts):
+            continue
+        if _excluded(rel.as_posix(), p.name, exclude):
             continue
         out.append(p)
     return out
 
 
-def scan(target: Path) -> list[dict]:
-    """扫描单个目标（目录或文件），返回 findings 列表。"""
+def _excluded(rel: str, name: str, exclude: tuple[str, ...]) -> bool:
+    return any(fnmatchcase(rel, pat) or fnmatchcase(name, pat) for pat in exclude)
+
+
+def scan(target: Path, *, exclude: tuple[str, ...] = ()) -> list[dict]:
+    """扫描单个目标（目录或文件），返回 findings 列表。
+
+    ``exclude``：相对路径 glob 黑名单，命中的文件整份跳过（不读取）。
+    """
     base = target.parent if target.is_file() else target
     findings: list[dict] = []
-    for path in _iter_files(target):
+    for path in _iter_files(target, exclude):
         try:
             text = path.read_text(encoding="utf-8", errors="ignore")
         except OSError:
@@ -97,6 +135,8 @@ def scan(target: Path) -> list[dict]:
                 if not m:
                     continue
                 snippet = m.group(0)
+                if rule_id == "PLAINTEXT_HTTP" and _is_noise_http(snippet):
+                    continue  # 回环 / 示例域名：降噪，不算命中
                 if len(snippet) > 60:
                     snippet = snippet[:57] + "..."
                 findings.append({
@@ -113,6 +153,8 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="阶段一静态扫描")
     ap.add_argument("target", help="目标目录或单个文件")
     ap.add_argument("--json", action="store_true", help="只输出 JSON")
+    ap.add_argument("--exclude", action="append", default=None, metavar="GLOB",
+                    help="跳过相对路径匹配该 glob 的文件（可重复）")
     a = ap.parse_args()
 
     target = Path(a.target).resolve()
@@ -121,7 +163,7 @@ def main() -> int:
                          ensure_ascii=False))
         return 2
 
-    findings = scan(target)
+    findings = scan(target, exclude=tuple(a.exclude or ()))
     if a.json:
         print(json.dumps({"target": str(target), "findings": findings},
                          ensure_ascii=False))
