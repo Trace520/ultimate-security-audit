@@ -121,6 +121,16 @@ Only "relative path + line number + matched snippet" leaves the machine; finding
 No key, no `requests`, network failure, malformed response — the original finding is kept and marked `UNRESOLVED`; results are never silently dropped.
 Budgets, the degradation matrix and privacy notes live in `references/ai-layer.md`.
 
+**6. Legacy debt (noise exclusion + baseline)**
+
+```bash
+usa . --approval-id CHG-2026-0417 --exclude 'vendor/**' --exclude '*.min.js'
+usa . --approval-id CHG-2026-0417 --baseline baseline.json --write-baseline
+usa . --approval-id CHG-2026-0417 --baseline baseline.json
+```
+
+`--exclude` skips a file entirely by relative-path glob (third-party bundles stop flooding the report); `--baseline` records existing findings, then reports only new ones — and the exit code follows only the new ones. Plaintext `http://` to loopback or example hosts (`localhost`, `127.0.0.1`, `*.example.com`) is dropped in stage one and never counted.
+
 ## Report formats
 
 | Format | Use | Command |
@@ -129,7 +139,7 @@ Budgets, the degradation matrix and privacy notes live in `references/ai-layer.m
 | json | Machine consumption / archive | `--format json --out audit.json` |
 | sarif | GitHub Code Scanning | `--format sarif --out results.sarif` |
 
-Every SARIF result carries `file` + `startLine` + `ruleId`. Level mapping is fixed: hardcoded credentials / `eval` / disabled certificate checks → `error`; everything else → `warning` or `note`.
+Every SARIF result carries `file` + `startLine` + `ruleId` + `partialFingerprints` (how Code Scanning dedupes across runs). Level mapping is fixed: hardcoded credentials / `eval` / disabled certificate checks → `error`; everything else → `warning` or `note`.
 
 ## Dogfooding
 

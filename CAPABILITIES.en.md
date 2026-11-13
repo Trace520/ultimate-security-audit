@@ -39,6 +39,7 @@ skipping a stage, leaving gaps, or changing the approval ID is `BLOCKED`. See `r
 - Suspicious patterns for 10 rules: hardcoded credentials, `eval`, `Function` constructor, process calls, disabled certificate checks, HTML injection sinks, SQL concatenation, plaintext HTTP, debug switches, obfuscated variable names assigned strings.
 - SCA: pinned versions only (`==` in `requirements.txt`, `version` in `package-lock.json`), via OSV `querybatch`.
 - Every finding carries `file:line`, a rule ID and a snippet; output is deterministic, enforced by `tests/test_golden.py`.
+- Noise control: plaintext `http://` to loopback / example hosts is dropped; `--exclude` skips a third-party bundle whole; `--baseline` reports only new findings.
 
 ## 4.5 AI review (optional second layer)
 
