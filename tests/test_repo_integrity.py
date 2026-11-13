@@ -22,6 +22,7 @@ DECLARED = [
     "references/state-machine.md",
     "references/fallback-matrix.md",
     "assets/audit_notes.template.md",
+    "assets/hero.svg",
     "scripts/__init__.py",
     "scripts/__main__.py",
     "scripts/run_audit.py",

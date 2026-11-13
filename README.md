@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://aka.doubaocdn.com/s/eopsS0yVb4" alt="Ultimate Security Audit" width="100%" />
+<img src="assets/hero.svg" alt="Ultimate Security Audit" width="100%" />
 
 # 🛡️ Ultimate Security Audit (USA)
 
@@ -151,7 +151,7 @@ ultimate-security-audit/
 ├── SKILL.md                 # Agent 入口契约（门控 + 状态机铁律）
 ├── CAPABILITIES.md          # 一页能力矩阵（含 .en 英文版）
 ├── references/              # 渐进披露：按需加载的细则（含 ai-layer.md）
-├── assets/                  # 证据笔记模板
+├── assets/                  # 证据笔记模板 + hero.svg 横幅
 ├── scripts/
 │   ├── run_audit.py         # 统一网关 usa
 │   ├── project_probe.py     # 阶段一静态扫描（10 条规则）

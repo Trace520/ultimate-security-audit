@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" width="1200" height="300" role="img" aria-label="Ultimate Security Audit">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#070e1b"/>
+      <stop offset="0.55" stop-color="#0d2338"/>
+      <stop offset="1" stop-color="#060c16"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.45" r="0.5">
+      <stop offset="0" stop-color="#2ee6c5" stop-opacity="0.26"/>
+      <stop offset="1" stop-color="#2ee6c5" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="shieldFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0f3b4a" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#0a1b2c" stop-opacity="0.85"/>
+    </linearGradient>
+    <linearGradient id="shieldStroke" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8ff7e4"/>
+      <stop offset="0.5" stop-color="#2ee6c5"/>
+      <stop offset="1" stop-color="#3b82f6"/>
+    </linearGradient>
+    <linearGradient id="streamA" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2ee6c5" stop-opacity="0"/>
+      <stop offset="0.25" stop-color="#2ee6c5" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#3b82f6" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="streamB" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3b82f6" stop-opacity="0"/>
+      <stop offset="0.35" stop-color="#3b82f6" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#2ee6c5" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="6"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="300" fill="url(#bg)"/>
+
+  <!-- 细网格 -->
+  <g stroke="#2ee6c5" stroke-opacity="0.07" stroke-width="1">
+    <path d="M0 60H1200M0 120H1200M0 180H1200M0 240H1200"/>
+    <path d="M120 0V300M240 0V300M360 0V300M480 0V300M600 0V300M720 0V300M840 0V300M960 0V300M1080 0V300"/>
+  </g>
+
+  <rect width="1200" height="300" fill="url(#glow)"/>
+
+  <!-- 左侧代码流 -->
+  <g fill="url(#streamA)" opacity="0.9">
+    <rect x="96" y="74" width="86" height="3"/>
+    <rect x="120" y="96" width="140" height="3"/>
+    <rect x="96" y="118" width="64" height="3"/>
+    <rect x="140" y="140" width="112" height="3"/>
+    <rect x="96" y="162" width="96" height="3"/>
+    <rect x="126" y="184" width="150" height="3"/>
+    <rect x="96" y="206" width="70" height="3"/>
+  </g>
+  <g fill="url(#streamB)" opacity="0.75">
+    <rect x="1102" y="70" width="3" height="80"/>
+    <rect x="1124" y="96" width="3" height="120"/>
+    <rect x="1146" y="60" width="3" height="70"/>
+    <rect x="1168" y="120" width="3" height="110"/>
+    <rect x="1060" y="88" width="3" height="96"/>
+  </g>
+
+  <!-- 右侧代码流 -->
+  <g fill="url(#streamA)" opacity="0.55">
+    <rect x="1010" y="96" width="84" height="3"/>
+    <rect x="1036" y="118" width="124" height="3"/>
+    <rect x="1010" y="140" width="58" height="3"/>
+    <rect x="1056" y="162" width="96" height="3"/>
+    <rect x="1018" y="184" width="110" height="3"/>
+    <rect x="1010" y="206" width="72" height="3"/>
+  </g>
+  <g fill="url(#streamB)" opacity="0.5">
+    <rect x="96" y="70" width="3" height="86"/>
+    <rect x="118" y="112" width="3" height="128"/>
+    <rect x="140" y="64" width="3" height="60"/>
+    <rect x="162" y="138" width="3" height="98"/>
+    <rect x="186" y="92" width="3" height="70"/>
+  </g>
+
+  <!-- 盾牌 + 锁 -->
+  <g filter="url(#soft)" opacity="0.55">
+    <path d="M600 40C648 60 690 76 714 86V162c0 56-48 92-114 114-66-22-114-58-114-114V86C510 76 552 56 600 40Z" fill="#2ee6c5" opacity="0.18"/>
+  </g>
+  <path d="M600 40C648 60 690 76 714 86V162c0 56-48 92-114 114-66-22-114-58-114-114V86C510 76 552 56 600 40Z"
+        fill="url(#shieldFill)" stroke="url(#shieldStroke)" stroke-width="3"/>
+  <path d="M600 62C640 78 674 91 694 99V162c0 47-41 78-94 97-53-19-94-50-94-97V99C506 91 560 78 600 62Z"
+        fill="none" stroke="#2ee6c5" stroke-opacity="0.25" stroke-width="1.5"/>
+
+  <g>
+    <rect x="574" y="150" width="52" height="46" rx="8" fill="none" stroke="#a8fff1" stroke-width="2.6"/>
+    <circle cx="600" cy="170" r="6.5" fill="#a8fff1"/>
+    <rect x="597" y="174" width="6" height="12" rx="3" fill="#a8fff1"/>
+    <path d="M582 150c0-12 8-20 18-20s18 8 18 20" fill="none" stroke="#a8fff1" stroke-width="2.6" stroke-linecap="round"/>
+  </g>
+
+  <!-- 四大支柱小字 -->
+  <text x="600" y="292" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+        font-size="11" letter-spacing="4.2" fill="#8fe9dc" fill-opacity="0.62">GATE · STATE MACHINE · SCA · SARIF</text>
+
+  <g fill="#2ee6c5" opacity="0.45">
+    <circle cx="452" cy="96" r="2"/>
+    <circle cx="742" cy="84" r="2"/>
+    <circle cx="790" cy="214" r="2"/>
+    <circle cx="404" cy="212" r="2"/>
+    <circle cx="332" cy="150" r="2"/>
+    <circle cx="872" cy="142" r="2"/>
+  </g>
+</svg>

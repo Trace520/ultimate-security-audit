@@ -1,14 +1,10 @@
-# 🛡️ Ultimate Security Audit (USA)
-
 <div align="center">
 
-<img src="https://aka.doubaocdn.com/s/eopsS0yVb4" alt="Ultimate Security Audit" width="100%" />
+<img src="assets/hero.svg" alt="Ultimate Security Audit" width="100%" />
 
-<h1>🛡️ Ultimate Security Audit (USA)</h1>
+# 🛡️ Ultimate Security Audit (USA)
 
-<p><strong>Authorization gate + anti-hallucination state machine + SCA + SARIF 2.1.0 output (v3.0.0)</strong></p>
-
-<p>
+**Authorization gate + anti-hallucination state machine + SCA + SARIF 2.1.0 output (v3.0.0)**
 
 [![CI](https://github.com/Trace520/ultimate-security-audit/actions/workflows/ci.yml/badge.svg)](https://github.com/Trace520/ultimate-security-audit/actions/workflows/ci.yml)
 [![SARIF 2.1.0](https://img.shields.io/badge/report-SARIF%202.1.0-blue?style=flat-square)](references/audit-report.md)
@@ -16,9 +12,7 @@
 [![License](https://img.shields.io/badge/license-MIT%20%2B%20Security%20Terms-green?style=flat-square)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](CONTRIBUTING.md)
 
-</p>
-
-<p><strong>English</strong> · <a href="README.md">简体中文</a></p>
+**English** · [简体中文](README.md)
 
 </div>
 
@@ -155,9 +149,9 @@ The results show up under the repository's Security tab. **Note**: demo keys in 
 ultimate-security-audit/
 ├── README.md / README.en.md # Front page (Chinese / English)
 ├── SKILL.md                 # Agent entry contract (gate + state-machine rules)
-├── CAPABILITIES.md          # One-page capability matrix
+├── CAPABILITIES.md          # One-page capability matrix (with .en edition)
 ├── references/              # Progressive disclosure: details on demand (incl. ai-layer.md)
-├── assets/                  # Evidence-note template
+├── assets/                  # Evidence-note template + hero.svg banner
 ├── scripts/
 │   ├── run_audit.py         # Unified gateway `usa`
 │   ├── project_probe.py     # Stage 1 static scan (10 rules)
