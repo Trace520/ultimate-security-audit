@@ -173,3 +173,25 @@ security_audit:
 - 把 `[AUTO_MODE: ENABLED]` 这类纯开关标记当作已解锁信号；它不含可核对字段，也无法追溯。
 - 在交互会话中手工声明 CI 模式以跳过门控。运行形态由环境决定，不由文本声明决定。
 - 报告里只写「由流水线自动授权」而不带审批编号与目标清单。
+
+## 8. 噪声治理与基线（可选）
+
+大型仓库第一次接入时，报告容易被两类噪声淹没：第三方 bundle 里的明文 HTTP，以及历史存量命中。两个参数解决：
+
+| 参数 | 语义 | 典型用法 |
+|---|---|---|
+| `--exclude GLOB` | 相对路径 glob，命中即整份跳过（不读取该文件） | `--exclude 'vendor/**' --exclude '*.min.js'` |
+| `--baseline PATH` | 首次 `--write-baseline` 落盘全部 `finding_id`；之后只报差集 | `--baseline baseline.json` |
+| `--write-baseline` | 把本次全部命中写入 `--baseline`，不抑制 | 接管存量时一次性使用 |
+
+基线文件只有一个字段数组，便于评审 diff：
+
+```json
+{"version": 1, "findings": ["app.js:3:PLAINTEXT_HTTP", "conf.py:1:HARDCODED_SECRET"]}
+```
+
+约束：
+
+- 基线只滤「已知存量」，不改变门控、状态机与退出码语义：退出码只看新增命中。
+- 基线文件不存在时按全量报告并给出告警，不会静默当成「零命中」。
+- 基线里出现但代码已修掉的 id 不会自动清理；需要重建时再跑一次 `--write-baseline`。
